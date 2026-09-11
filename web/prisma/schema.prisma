@@ -1,0 +1,12 @@
+// Схема базы данных Opion.
+// Модели добавим, когда определимся с каталогом и заказами.
+// Документация: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}

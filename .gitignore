@@ -1,0 +1,71 @@
+# Dependencies
+node_modules/
+.pnp/
+.pnp.*
+
+# Build output
+.next/
+out/
+dist/
+build/
+*.tsbuildinfo
+next-env.d.ts
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Caches
+.cache/
+.turbo/
+.eslintcache
+coverage/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# Media: тяжёлые исходники не хранятся в git (нет LFS).
+# Подробности и правила — в media/README.md
+*.psd
+*.ai
+*.sketch
+*.fig
+*.xd
+*.indd
+*.aep
+*.prproj
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.webm
+*.raw
+*.arw
+*.cr2
+*.cr3
+*.nef
+*.dng
+*.tif
+*.tiff
+*.zip
+*.rar
+*.7z
+
+# Скилы Prisma CLI — ставятся локально командой `prisma init`
+.agents/
+.claude/
+skills-lock.json
