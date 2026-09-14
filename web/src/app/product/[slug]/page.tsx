@@ -30,64 +30,76 @@ export default async function ProductPage({ params }: PageProps<"/product/[slug]
   }
 
   const type = await getProductTypeBySlug(product.typeSlug);
+  const [cover] = product.images;
   const hasDiscount =
     product.compareAtPriceMinor !== undefined && product.compareAtPriceMinor > product.priceMinor;
 
   return (
-    <Container className="grid gap-12 py-14 lg:grid-cols-2 lg:gap-16">
-      <div className="grid gap-3">
-        {product.images.length > 0 ? (
-          product.images.map((image) => (
-            <div key={image.url} className="relative aspect-3/4 overflow-hidden bg-surface">
-              <Image
-                src={image.url}
-                alt={image.alt}
-                fill
-                sizes="(min-width: 1024px) 50vw, 100vw"
-                className="object-cover"
-                priority
-              />
+    /**
+     * На большом экране карточка занимает ровно один экран и не прокручивается:
+     * 5rem — высота плавающей шапки, 1.5rem — воздух под карточкой.
+     * На узких экранах ограничение снимается, иначе содержимое не поместится.
+     */
+    <Container className="py-6 lg:h-[calc(100svh-5rem)]">
+      <div className="grid h-full gap-8 lg:grid-cols-2 lg:gap-12">
+        <div className="relative aspect-3/4 overflow-hidden bg-surface lg:aspect-auto lg:h-full">
+          {cover ? (
+            <Image
+              src={cover.url}
+              alt={cover.alt}
+              fill
+              sizes="(min-width: 1024px) 50vw, 100vw"
+              className="object-cover"
+              priority
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center">
+              <span className="text-xs tracking-widest text-ink-muted uppercase">Фото скоро</span>
             </div>
-          ))
-        ) : (
-          <div className="flex aspect-3/4 items-center justify-center bg-surface">
-            <span className="text-xs tracking-widest text-ink-muted uppercase">Фото скоро</span>
+          )}
+        </div>
+
+        {/* justify-between разносит блоки по всей высоте картинки: описание сверху,
+            кнопка прижата к низу, размеры и цвета — посередине. */}
+        <div className="flex h-full flex-col justify-between gap-10">
+          <div>
+            {type ? (
+              <Link
+                href={`/?${TYPE_PARAM}=${type.slug}`}
+                className="text-xs tracking-widest text-ink-muted uppercase transition-colors hover:text-ink"
+              >
+                {type.name}
+              </Link>
+            ) : null}
+
+            <h1 className="font-display mt-3 text-4xl leading-tight xl:text-5xl">{product.name}</h1>
+
+            <p className="mt-4 text-lg">
+              {hasDiscount ? (
+                <span className="mr-3 text-ink-muted line-through">{formatPrice(product.compareAtPriceMinor!)}</span>
+              ) : null}
+              <span>{formatPrice(product.priceMinor)}</span>
+            </p>
+
+            <p className="mt-6 max-w-md text-sm text-ink-muted">{product.description}</p>
           </div>
-        )}
-      </div>
 
-      <div className="lg:sticky lg:top-24 lg:self-start">
-        {type ? (
-          <Link
-            href={`/?${TYPE_PARAM}=${type.slug}`}
-            className="text-xs tracking-widest text-ink-muted uppercase transition-colors hover:text-ink"
-          >
-            {type.name}
-          </Link>
-        ) : null}
+          <div className="flex flex-col gap-8">
+            <Specification title="Размеры" values={product.sizes} />
+            <Specification title="Цвета" values={product.colors} />
+          </div>
 
-        <h1 className="font-display mt-3 text-4xl leading-tight">{product.name}</h1>
-
-        <p className="mt-4 text-lg">
-          {hasDiscount ? (
-            <span className="mr-3 text-ink-muted line-through">{formatPrice(product.compareAtPriceMinor!)}</span>
-          ) : null}
-          <span>{formatPrice(product.priceMinor)}</span>
-        </p>
-
-        <p className="mt-6 text-sm text-ink-muted">{product.description}</p>
-
-        <Specification title="Размеры" values={product.sizes} />
-        <Specification title="Цвета" values={product.colors} />
-
-        <button
-          type="button"
-          disabled
-          className="mt-10 w-full bg-accent py-3 text-sm text-accent-contrast disabled:opacity-40"
-        >
-          В корзину
-        </button>
-        <p className="mt-3 text-xs text-ink-muted">Оформление заказа заработает вместе с корзиной.</p>
+          <div>
+            <button
+              type="button"
+              disabled
+              className="w-full rounded-full bg-accent py-3.5 text-sm text-accent-contrast disabled:opacity-40"
+            >
+              В корзину
+            </button>
+            <p className="mt-3 text-xs text-ink-muted">Оформление заказа заработает вместе с корзиной.</p>
+          </div>
+        </div>
       </div>
     </Container>
   );
@@ -99,11 +111,11 @@ function Specification({ title, values }: { title: string; values: readonly stri
   }
 
   return (
-    <div className="mt-8">
+    <div>
       <h2 className="text-xs tracking-widest text-ink-muted uppercase">{title}</h2>
       <ul className="mt-3 flex flex-wrap gap-2">
         {values.map((value) => (
-          <li key={value} className="border border-line px-3 py-1.5 text-sm">
+          <li key={value} className="rounded-full border border-line px-4 py-1.5 text-sm">
             {value}
           </li>
         ))}

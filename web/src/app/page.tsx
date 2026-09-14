@@ -28,7 +28,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
         <CatalogFilter types={types} styles={styles} filters={filters} />
       </Container>
 
-      <Container>
+      <Container className="pb-24">
         <ProductGrid products={products} />
       </Container>
     </>
