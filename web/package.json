@@ -38,5 +38,8 @@
     "tsx": "^4.23.13",
     "typescript": "^5"
   },
-  "description": "Сайт Opion"
+  "description": "Сайт Opion",
+  "engines": {
+    "node": ">=24 <25"
+  }
 }
