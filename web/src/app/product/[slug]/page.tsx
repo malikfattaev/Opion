@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { AddToCartForm } from "@/components/catalog/add-to-cart-form";
 import { Container } from "@/components/layout/container";
-import { getProductBySlug, getProducts, getProductTypeBySlug } from "@/lib/catalog";
-import { TYPE_PARAM } from "@/lib/catalog/filters";
+import { getProductBySlug, getProducts } from "@/lib/catalog";
 import { formatPrice } from "@/lib/money";
 
 export async function generateStaticParams() {
@@ -29,7 +28,6 @@ export default async function ProductPage({ params }: PageProps<"/product/[slug]
     notFound();
   }
 
-  const type = await getProductTypeBySlug(product.typeSlug);
   const [cover] = product.images;
   const hasDiscount =
     product.compareAtPriceMinor !== undefined && product.compareAtPriceMinor > product.priceMinor;
@@ -37,8 +35,8 @@ export default async function ProductPage({ params }: PageProps<"/product/[slug]
   return (
     /**
      * На большом экране карточка занимает ровно один экран и не прокручивается:
-     * 5rem — высота плавающей шапки, 1.5rem — воздух под карточкой.
-     * На узких экранах ограничение снимается, иначе содержимое не поместится.
+     * 5rem — высота плавающей шапки. На узких экранах ограничение снимается,
+     * иначе содержимое не поместится.
      */
     <Container className="py-6 lg:h-[calc(100svh-5rem)]">
       <div className="grid h-full gap-8 lg:grid-cols-2 lg:gap-12">
@@ -59,20 +57,11 @@ export default async function ProductPage({ params }: PageProps<"/product/[slug]
           )}
         </div>
 
-        {/* justify-between разносит блоки по всей высоте картинки: описание сверху,
-            кнопка прижата к низу, размеры и цвета — посередине. */}
+        {/* justify-between разносит блоки по высоте картинки: описание сверху,
+            размеры и кнопка — внизу, вплотную друг к другу. */}
         <div className="flex h-full flex-col justify-between gap-10">
           <div>
-            {type ? (
-              <Link
-                href={`/?${TYPE_PARAM}=${type.slug}`}
-                className="text-xs tracking-widest text-ink-muted uppercase transition-colors hover:text-ink"
-              >
-                {type.name}
-              </Link>
-            ) : null}
-
-            <h1 className="font-display mt-3 text-4xl leading-tight xl:text-5xl">{product.name}</h1>
+            <h1 className="font-display text-4xl leading-tight xl:text-5xl">{product.name}</h1>
 
             <p className="mt-4 text-lg">
               {hasDiscount ? (
@@ -84,42 +73,9 @@ export default async function ProductPage({ params }: PageProps<"/product/[slug]
             <p className="mt-6 max-w-md text-sm text-ink-muted">{product.description}</p>
           </div>
 
-          <div className="flex flex-col gap-8">
-            <Specification title="Размеры" values={product.sizes} />
-            <Specification title="Цвета" values={product.colors} />
-          </div>
-
-          <div>
-            <button
-              type="button"
-              disabled
-              className="w-full rounded-full bg-accent py-3.5 text-sm text-accent-contrast disabled:opacity-40"
-            >
-              В корзину
-            </button>
-            <p className="mt-3 text-xs text-ink-muted">Оформление заказа заработает вместе с корзиной.</p>
-          </div>
+          <AddToCartForm product={product} />
         </div>
       </div>
     </Container>
-  );
-}
-
-function Specification({ title, values }: { title: string; values: readonly string[] }) {
-  if (values.length === 0) {
-    return null;
-  }
-
-  return (
-    <div>
-      <h2 className="text-xs tracking-widest text-ink-muted uppercase">{title}</h2>
-      <ul className="mt-3 flex flex-wrap gap-2">
-        {values.map((value) => (
-          <li key={value} className="rounded-full border border-line px-4 py-1.5 text-sm">
-            {value}
-          </li>
-        ))}
-      </ul>
-    </div>
   );
 }

@@ -26,6 +26,5 @@ export type Product = {
   /** Зачёркнутая старая цена, если товар со скидкой. */
   compareAtPriceMinor?: number;
   sizes: readonly string[];
-  colors: readonly string[];
   images: readonly ProductImage[];
 };

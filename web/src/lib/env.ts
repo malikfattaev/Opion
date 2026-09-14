@@ -20,8 +20,19 @@ const serverEnvSchema = z.object({
     .refine((value) => value.startsWith("postgres://") || value.startsWith("postgresql://"), {
       error: "строка подключения должна начинаться с postgres:// или postgresql://",
     }),
-  /** Токен бота из @BotFather. Нужен для проверки подписи initData мини-аппа. */
+  /**
+   * Приём заказов. Переменные необязательны, чтобы сборка и локальная разработка
+   * не требовали доступа к боевому боту; на самом оформлении их наличие
+   * проверяется явно и с понятной ошибкой.
+   */
   TELEGRAM_BOT_TOKEN: z.string().min(1).optional(),
+  /** Куда бот шлёт заказы: id группы основателей. Для групп он отрицательный. */
+  TELEGRAM_ORDERS_CHAT_ID: z.string().min(1).optional(),
+
+  /** Реквизиты для перевода, которые видит покупатель на оплате. */
+  PAYMENT_CARD_NUMBER: z.string().min(1).optional(),
+  PAYMENT_CARD_HOLDER: z.string().min(1).optional(),
+  PAYMENT_BANK: z.string().min(1).optional(),
 });
 
 type PublicEnv = z.infer<typeof publicEnvSchema>;

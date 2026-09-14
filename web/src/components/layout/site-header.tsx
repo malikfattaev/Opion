@@ -5,15 +5,16 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 import { Logo } from "@/components/brand/logo";
-import { CartIcon, CloseIcon, MenuIcon, UserIcon } from "@/components/icons";
+import { CartIcon, CloseIcon, MenuIcon } from "@/components/icons";
 import { Container } from "@/components/layout/container";
 import { mainNavigation, type NavigationItem } from "@/config/site";
+import { useCart } from "@/lib/cart/use-cart";
 
 const CART_ITEM: NavigationItem = { href: "/cart", label: "Корзина" };
-const ACCOUNT_ITEM: NavigationItem = { href: "/account", label: "Профиль" };
 
 export function SiteHeader() {
   const pathname = usePathname();
+  const { isReady, totalQuantity } = useCart();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // Меню закрывается по клику на ссылку, а не эффектом на смену адреса:
@@ -41,12 +42,15 @@ export function SiteHeader() {
           </nav>
 
           <div className="flex items-center gap-1">
-            <IconLink item={ACCOUNT_ITEM} isActive={isActiveItem(pathname, ACCOUNT_ITEM)} onClick={closeMenu}>
-              <UserIcon />
-            </IconLink>
-
             <IconLink item={CART_ITEM} isActive={isActiveItem(pathname, CART_ITEM)} onClick={closeMenu}>
               <CartIcon />
+              {/* Счётчик появляется только после чтения localStorage — иначе
+                  разметка сервера и клиента разойдутся на первом рендере. */}
+              {isReady && totalQuantity > 0 ? (
+                <span className="absolute -top-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full bg-accent text-[0.625rem] text-accent-contrast">
+                  {totalQuantity}
+                </span>
+              ) : null}
             </IconLink>
 
             <button
@@ -131,7 +135,7 @@ function IconLink({
       title={item.label}
       aria-label={item.label}
       aria-current={isActive ? "page" : undefined}
-      className={`p-2 transition-colors hover:text-ink ${isActive ? "text-ink" : "text-ink-muted"}`}
+      className={`relative p-2 transition-colors hover:text-ink ${isActive ? "text-ink" : "text-ink-muted"}`}
     >
       {children}
     </Link>

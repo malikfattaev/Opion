@@ -35,7 +35,6 @@ export const placeholderProducts: readonly Product[] = [
     styleSlugs: ["streetwear", "alt"],
     priceMinor: toMinorUnits(7900),
     sizes: ["S", "M", "L", "XL"],
-    colors: ["Чёрный", "Кремовый"],
     images: [],
   },
   {
@@ -46,7 +45,6 @@ export const placeholderProducts: readonly Product[] = [
     styleSlugs: ["minimal", "streetwear"],
     priceMinor: toMinorUnits(3200),
     sizes: ["S", "M", "L", "XL"],
-    colors: ["Чёрный", "Белый"],
     images: [],
   },
   {
@@ -58,7 +56,6 @@ export const placeholderProducts: readonly Product[] = [
     priceMinor: toMinorUnits(9400),
     compareAtPriceMinor: toMinorUnits(11900),
     sizes: ["44", "46", "48", "50"],
-    colors: ["Синий", "Чёрный"],
     images: [],
   },
   {
@@ -69,7 +66,6 @@ export const placeholderProducts: readonly Product[] = [
     styleSlugs: ["streetwear", "vintage"],
     priceMinor: toMinorUnits(16500),
     sizes: ["S", "M", "L"],
-    colors: ["Чёрный"],
     images: [],
   },
   {
@@ -80,7 +76,6 @@ export const placeholderProducts: readonly Product[] = [
     styleSlugs: ["minimal", "alt"],
     priceMinor: toMinorUnits(2400),
     sizes: ["OS"],
-    colors: ["Чёрный", "Кремовый"],
     images: [],
   },
   {
@@ -91,7 +86,6 @@ export const placeholderProducts: readonly Product[] = [
     styleSlugs: ["minimal", "vintage"],
     priceMinor: toMinorUnits(6700),
     sizes: ["S", "M", "L", "XL"],
-    colors: ["Белый", "Чёрный"],
     images: [],
   },
   {
@@ -102,7 +96,6 @@ export const placeholderProducts: readonly Product[] = [
     styleSlugs: ["y2k", "alt"],
     priceMinor: toMinorUnits(8900),
     sizes: ["44", "46", "48", "50"],
-    colors: ["Чёрный", "Хаки"],
     images: [],
   },
   {
@@ -113,7 +106,6 @@ export const placeholderProducts: readonly Product[] = [
     styleSlugs: ["minimal", "streetwear"],
     priceMinor: toMinorUnits(6400),
     sizes: ["S", "M", "L", "XL"],
-    colors: ["Чёрный", "Кремовый"],
     images: [],
   },
 ];
