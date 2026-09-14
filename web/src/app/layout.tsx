@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Playfair_Display } from "next/font/google";
 
-import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { brand } from "@/config/brand";
 import { siteConfig } from "@/config/site";
@@ -46,8 +45,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="ru" className={`${sansBody.variable} ${display.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
         <SiteHeader />
-        <main className="flex-1">{children}</main>
-        <SiteFooter />
+        <main className="flex-1 pb-24">{children}</main>
       </body>
     </html>
   );

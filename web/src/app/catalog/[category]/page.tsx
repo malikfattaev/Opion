@@ -33,7 +33,7 @@ export default async function CategoryPage({ params }: PageProps<"/catalog/[cate
     <>
       <h1 className="sr-only">{category.name}</h1>
 
-      <Container className="pb-10">
+      <Container className="pt-10 pb-10">
         <CategoryFilter categories={categories} activeSlug={slug} />
       </Container>
 

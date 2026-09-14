@@ -5,8 +5,12 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 import { Logo } from "@/components/brand/logo";
+import { CartIcon, CloseIcon, MenuIcon, UserIcon } from "@/components/icons";
 import { Container } from "@/components/layout/container";
 import { mainNavigation, type NavigationItem } from "@/config/site";
+
+const CART_ITEM: NavigationItem = { href: "/cart", label: "Корзина" };
+const ACCOUNT_ITEM: NavigationItem = { href: "/account", label: "Профиль" };
 
 export function SiteHeader() {
   const pathname = usePathname();
@@ -17,15 +21,15 @@ export function SiteHeader() {
   const closeMenu = () => setIsMenuOpen(false);
 
   return (
-    <header className="relative z-50">
+    <header className="relative z-50 pt-4 sm:pt-6">
       <Container>
-        <div className="flex h-20 items-center justify-between gap-6">
+        <div className="flex h-14 items-center justify-between gap-6 rounded-full border border-line bg-surface px-5 sm:px-7">
           <Link href="/" aria-label="На главную" onClick={closeMenu} className="shrink-0">
             <Logo />
           </Link>
 
           <nav aria-label="Основная навигация" className="hidden md:block">
-            <ul className="flex items-center gap-8">
+            <ul className="flex items-center gap-7">
               {mainNavigation.map((item) => (
                 <li key={item.href}>
                   <NavLink href={item.href} isActive={isActiveItem(pathname, item)}>
@@ -36,19 +40,24 @@ export function SiteHeader() {
             </ul>
           </nav>
 
-          <div className="flex items-center gap-5">
-            <NavLink href="/cart" isActive={isActiveItem(pathname, CART_ITEM)} onClick={closeMenu}>
-              Корзина
-            </NavLink>
+          <div className="flex items-center gap-1">
+            <IconLink item={ACCOUNT_ITEM} isActive={isActiveItem(pathname, ACCOUNT_ITEM)} onClick={closeMenu}>
+              <UserIcon />
+            </IconLink>
+
+            <IconLink item={CART_ITEM} isActive={isActiveItem(pathname, CART_ITEM)} onClick={closeMenu}>
+              <CartIcon />
+            </IconLink>
 
             <button
               type="button"
               onClick={() => setIsMenuOpen((open) => !open)}
               aria-expanded={isMenuOpen}
               aria-controls="mobile-navigation"
-              className="-mr-2 p-2 text-sm md:hidden"
+              aria-label={isMenuOpen ? "Закрыть меню" : "Открыть меню"}
+              className="p-2 text-ink-muted transition-colors hover:text-ink md:hidden"
             >
-              {isMenuOpen ? "Закрыть" : "Меню"}
+              {isMenuOpen ? <CloseIcon /> : <MenuIcon />}
             </button>
           </div>
         </div>
@@ -56,13 +65,13 @@ export function SiteHeader() {
 
       {/* Панель раскрывается поверх содержимого, поэтому у неё свой фон. */}
       {isMenuOpen ? (
-        <nav
-          id="mobile-navigation"
-          aria-label="Мобильная навигация"
-          className="absolute inset-x-0 top-full bg-canvas md:hidden"
-        >
-          <Container>
-            <ul className="flex flex-col pb-4">
+        <Container className="absolute inset-x-0 top-full pt-2 md:hidden">
+          <nav
+            id="mobile-navigation"
+            aria-label="Мобильная навигация"
+            className="rounded-3xl border border-line bg-surface px-5 py-2"
+          >
+            <ul className="flex flex-col">
               {mainNavigation.map((item) => (
                 <li key={item.href}>
                   <Link
@@ -76,8 +85,8 @@ export function SiteHeader() {
                 </li>
               ))}
             </ul>
-          </Container>
-        </nav>
+          </nav>
+        </Container>
       ) : null}
     </header>
   );
@@ -86,18 +95,15 @@ export function SiteHeader() {
 function NavLink({
   href,
   isActive,
-  onClick,
   children,
 }: {
   href: string;
   isActive: boolean;
-  onClick?: () => void;
   children: React.ReactNode;
 }) {
   return (
     <Link
       href={href}
-      onClick={onClick}
       aria-current={isActive ? "page" : undefined}
       className={`text-sm transition-colors hover:text-ink ${isActive ? "text-ink" : "text-ink-muted"}`}
     >
@@ -106,7 +112,31 @@ function NavLink({
   );
 }
 
-const CART_ITEM: NavigationItem = { href: "/cart", label: "Корзина" };
+/** Иконка без подписи: название раздела остаётся для скринридеров и подсказки. */
+function IconLink({
+  item,
+  isActive,
+  onClick,
+  children,
+}: {
+  item: NavigationItem;
+  isActive: boolean;
+  onClick?: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <Link
+      href={item.href}
+      onClick={onClick}
+      title={item.label}
+      aria-label={item.label}
+      aria-current={isActive ? "page" : undefined}
+      className={`p-2 transition-colors hover:text-ink ${isActive ? "text-ink" : "text-ink-muted"}`}
+    >
+      {children}
+    </Link>
+  );
+}
 
 /**
  * Пункт активен на своей странице и на вложенных. Главную сравниваем строго:

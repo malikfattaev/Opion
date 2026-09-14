@@ -20,18 +20,13 @@ export type NavigationItem = {
 };
 
 /**
- * Основная навигация. Каталог — это и есть главная: витрина открывается сразу,
- * без промежуточной страницы.
+ * Вся навигация сайта. Подвала нет, поэтому каждый раздел должен быть
+ * достижим отсюда — иначе страница окажется без единой ссылки на себя.
  */
 export const mainNavigation: readonly NavigationItem[] = [
   { href: "/", label: "Каталог", activePrefixes: ["/catalog"] },
   { href: "/lookbook", label: "Лукбук" },
   { href: "/about", label: "О бренде" },
-];
-
-/** Служебные ссылки — только в подвале. */
-export const footerNavigation: readonly NavigationItem[] = [
-  { href: "/delivery", label: "Доставка и оплата" },
-  { href: "/returns", label: "Возврат" },
+  { href: "/delivery", label: "Доставка" },
   { href: "/contacts", label: "Контакты" },
 ];

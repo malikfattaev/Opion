@@ -17,7 +17,7 @@ export default async function HomePage() {
       {/* Заголовок нужен поисковикам и скринридерам, но занимать первый экран не должен. */}
       <h1 className="sr-only">Каталог Opion</h1>
 
-      <Container className="pb-10">
+      <Container className="pt-10 pb-10">
         <CategoryFilter categories={categories} />
       </Container>
 
