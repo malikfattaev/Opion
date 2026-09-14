@@ -17,7 +17,7 @@ export function CategoryFilter({
     <nav aria-label="Категории" className="-mx-5 overflow-x-auto px-5 sm:mx-0 sm:px-0">
       <ul className="flex gap-6 whitespace-nowrap">
         <li>
-          <CategoryLink href="/catalog" isActive={activeSlug === undefined}>
+          <CategoryLink href="/" isActive={activeSlug === undefined}>
             Все
           </CategoryLink>
         </li>

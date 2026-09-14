@@ -4,7 +4,6 @@ import { notFound } from "next/navigation";
 import { CategoryFilter } from "@/components/catalog/category-filter";
 import { ProductGrid } from "@/components/catalog/product-grid";
 import { Container } from "@/components/layout/container";
-import { PageIntro } from "@/components/layout/page-intro";
 import { getCategories, getCategoryBySlug, getProducts } from "@/lib/catalog";
 
 export async function generateStaticParams() {
@@ -32,13 +31,13 @@ export default async function CategoryPage({ params }: PageProps<"/catalog/[cate
 
   return (
     <>
-      <PageIntro title={category.name} description={category.description} />
+      <h1 className="sr-only">{category.name}</h1>
 
-      <Container className="border-b border-line">
+      <Container className="pb-10">
         <CategoryFilter categories={categories} activeSlug={slug} />
       </Container>
 
-      <Container className="pt-12">
+      <Container>
         <ProductGrid products={products} />
       </Container>
     </>

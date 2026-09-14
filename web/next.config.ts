@@ -1,7 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Каталог переехал на главную; старый адрес не должен отдавать 404.
+  async redirects() {
+    return [{ source: "/catalog", destination: "/", permanent: true }];
+  },
 };
 
 export default nextConfig;

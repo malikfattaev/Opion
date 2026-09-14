@@ -6,20 +6,20 @@ import { useState } from "react";
 
 import { Logo } from "@/components/brand/logo";
 import { Container } from "@/components/layout/container";
-import { mainNavigation } from "@/config/site";
+import { mainNavigation, type NavigationItem } from "@/config/site";
 
 export function SiteHeader() {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // Меню закрывается по клику на ссылку, а не эффектом на смену адреса:
-  // так нет лишнего рендера и состояние меняется ровно там, где его меняет человек.
+  // так нет лишнего рендера и состояние меняется там, где его меняет человек.
   const closeMenu = () => setIsMenuOpen(false);
 
   return (
-    <header className="bg-canvas/90 sticky top-0 z-50 border-b border-line backdrop-blur">
+    <header className="relative z-50">
       <Container>
-        <div className="flex h-16 items-center justify-between gap-6">
+        <div className="flex h-20 items-center justify-between gap-6">
           <Link href="/" aria-label="На главную" onClick={closeMenu} className="shrink-0">
             <Logo />
           </Link>
@@ -28,7 +28,7 @@ export function SiteHeader() {
             <ul className="flex items-center gap-8">
               {mainNavigation.map((item) => (
                 <li key={item.href}>
-                  <NavLink href={item.href} isActive={isActivePath(pathname, item.href)}>
+                  <NavLink href={item.href} isActive={isActiveItem(pathname, item)}>
                     {item.label}
                   </NavLink>
                 </li>
@@ -37,7 +37,7 @@ export function SiteHeader() {
           </nav>
 
           <div className="flex items-center gap-5">
-            <NavLink href="/cart" isActive={isActivePath(pathname, "/cart")} onClick={closeMenu}>
+            <NavLink href="/cart" isActive={isActiveItem(pathname, CART_ITEM)} onClick={closeMenu}>
               Корзина
             </NavLink>
 
@@ -54,16 +54,21 @@ export function SiteHeader() {
         </div>
       </Container>
 
+      {/* Панель раскрывается поверх содержимого, поэтому у неё свой фон. */}
       {isMenuOpen ? (
-        <nav id="mobile-navigation" aria-label="Мобильная навигация" className="border-t border-line md:hidden">
+        <nav
+          id="mobile-navigation"
+          aria-label="Мобильная навигация"
+          className="absolute inset-x-0 top-full bg-canvas md:hidden"
+        >
           <Container>
-            <ul className="flex flex-col py-2">
+            <ul className="flex flex-col pb-4">
               {mainNavigation.map((item) => (
                 <li key={item.href}>
                   <Link
                     href={item.href}
                     onClick={closeMenu}
-                    aria-current={isActivePath(pathname, item.href) ? "page" : undefined}
+                    aria-current={isActiveItem(pathname, item) ? "page" : undefined}
                     className="block py-3 text-base"
                   >
                     {item.label}
@@ -101,7 +106,17 @@ function NavLink({
   );
 }
 
-/** Раздел считается активным и на вложенных страницах: /catalog/[category]. */
-function isActivePath(pathname: string, href: string): boolean {
-  return pathname === href || pathname.startsWith(`${href}/`);
+const CART_ITEM: NavigationItem = { href: "/cart", label: "Корзина" };
+
+/**
+ * Пункт активен на своей странице и на вложенных. Главную сравниваем строго:
+ * иначе «/» оказалась бы префиксом вообще всех адресов.
+ */
+function isActiveItem(pathname: string, item: NavigationItem): boolean {
+  const prefixes = [...(item.href === "/" ? [] : [item.href]), ...(item.activePrefixes ?? [])];
+
+  return (
+    pathname === item.href ||
+    prefixes.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))
+  );
 }

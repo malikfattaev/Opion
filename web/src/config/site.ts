@@ -12,18 +12,26 @@ export const siteConfig = {
   miniAppUrl: publicEnv.NEXT_PUBLIC_MINI_APP_URL,
 } as const;
 
-/** Основная навигация в шапке и подвале. */
-export const mainNavigation = [
-  { href: "/catalog", label: "Каталог" },
+export type NavigationItem = {
+  href: string;
+  label: string;
+  /** Пути, на которых пункт тоже подсвечивается: страницы категорий, например. */
+  activePrefixes?: readonly string[];
+};
+
+/**
+ * Основная навигация. Каталог — это и есть главная: витрина открывается сразу,
+ * без промежуточной страницы.
+ */
+export const mainNavigation: readonly NavigationItem[] = [
+  { href: "/", label: "Каталог", activePrefixes: ["/catalog"] },
   { href: "/lookbook", label: "Лукбук" },
   { href: "/about", label: "О бренде" },
-] as const;
+];
 
 /** Служебные ссылки — только в подвале. */
-export const footerNavigation = [
+export const footerNavigation: readonly NavigationItem[] = [
   { href: "/delivery", label: "Доставка и оплата" },
   { href: "/returns", label: "Возврат" },
   { href: "/contacts", label: "Контакты" },
-] as const;
-
-export type NavigationItem = (typeof mainNavigation)[number] | (typeof footerNavigation)[number];
+];
