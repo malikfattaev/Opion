@@ -44,7 +44,7 @@ export function SiteHeader() {
           <div className="flex items-center gap-1">
             <IconLink item={CART_ITEM} isActive={isActiveItem(pathname, CART_ITEM)} onClick={closeMenu}>
               <CartIcon />
-              {/* Счётчик появляется только после чтения localStorage — иначе
+              {/* Счётчик появляется только после чтения localStorage, иначе
                   разметка сервера и клиента разойдутся на первом рендере. */}
               {isReady && totalQuantity > 0 ? (
                 <span className="absolute -top-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full bg-accent text-[0.625rem] text-accent-contrast">

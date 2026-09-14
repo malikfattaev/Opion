@@ -2,7 +2,7 @@ import { placeholderProducts, placeholderStyles, placeholderTypes } from "./plac
 import type { Product, ProductStyle, ProductType } from "./types";
 
 /**
- * Единственная дверь в каталог. Сейчас за ней временные данные, дальше —
+ * Единственная дверь в каталог. Сейчас за ней временные данные, дальше будут
  * запросы к PostgreSQL через Prisma. Функции асинхронные именно поэтому:
  * при переходе на базу вызывающий код менять не придётся.
  */

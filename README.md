@@ -6,13 +6,13 @@
 
 ```
 OPION/
-├── media/     Логотипы, съёмки, посты, видео — источник правды по контенту
+├── media/     Логотипы, съёмки, посты, видео: источник правды по контенту
 ├── web/       Сайт: Next.js 16 + TypeScript + Tailwind 4
 ├── app/       Telegram Mini App: Next.js 16 + TypeScript + Tailwind 4
 └── docs/      Архитектура, деплой, рабочие соглашения
 ```
 
-Подробности по папкам — в [media/README.md](media/README.md) и [docs/](docs/).
+Подробности по папкам смотрите в [media/README.md](media/README.md) и [docs/](docs/).
 
 ## Быстрый старт
 
@@ -24,7 +24,7 @@ cd web && npm install && cp .env.example .env && npm run dev
 cd app && npm install && cp .env.example .env && npm run dev
 ```
 
-Сайт поднимается на `http://localhost:3000`, мини-апп — на следующем свободном порту
+Сайт поднимается на `http://localhost:3000`, мини-апп на следующем свободном порту
 (`npm run dev -- -p 3001`, чтобы задать явно).
 
 ## Стек
@@ -38,7 +38,7 @@ cd app && npm install && cp .env.example .env && npm run dev
 | Хостинг      | Railway                             |
 | Репозиторий  | GitHub                              |
 
-Telegram Mini App — это веб-приложение внутри мессенджера, поэтому он собран на том же
+Telegram Mini App это веб-приложение внутри мессенджера, поэтому он собран на том же
 стеке, что и сайт. Expo остаётся в запасе на случай нативных приложений для App Store
 и Google Play.
 

@@ -35,7 +35,7 @@ export default async function ProductPage({ params }: PageProps<"/product/[slug]
   return (
     /**
      * На большом экране карточка занимает ровно один экран и не прокручивается:
-     * 5rem — высота плавающей шапки. На узких экранах ограничение снимается,
+     * 5rem это высота плавающей шапки. На узких экранах ограничение снимается,
      * иначе содержимое не поместится.
      */
     <Container className="py-6 lg:h-[calc(100svh-5rem)]">
@@ -58,7 +58,7 @@ export default async function ProductPage({ params }: PageProps<"/product/[slug]
         </div>
 
         {/* justify-between разносит блоки по высоте картинки: описание сверху,
-            размеры и кнопка — внизу, вплотную друг к другу. */}
+            размеры и кнопка внизу, вплотную друг к другу. */}
         <div className="flex h-full flex-col justify-between gap-10">
           <div>
             <h1 className="font-display text-4xl leading-tight xl:text-5xl">{product.name}</h1>

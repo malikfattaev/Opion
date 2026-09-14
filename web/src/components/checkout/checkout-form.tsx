@@ -20,7 +20,7 @@ export function CheckoutForm({ payment }: { payment: PaymentView }) {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [orderNumber, setOrderNumber] = useState<string | null>(null);
+  const [completedOrder, setCompletedOrder] = useState<{ number: string | null } | null>(null);
   const [screenshotName, setScreenshotName] = useState<string | null>(null);
   const [isCopied, setIsCopied] = useState(false);
 
@@ -58,10 +58,8 @@ export function CheckoutForm({ payment }: { payment: PaymentView }) {
         return;
       }
 
-      const number = readOrderNumber(payload);
-
-      // Номер показываем первым: очистка корзины опустошит экран оформления.
-      setOrderNumber(number);
+      // Признак успеха ставим первым: очистка корзины опустошит экран оформления.
+      setCompletedOrder({ number: readOrderNumber(payload) });
       clear();
     } catch {
       setError("Нет связи с сервером. Проверьте интернет и попробуйте ещё раз.");
@@ -70,13 +68,17 @@ export function CheckoutForm({ payment }: { payment: PaymentView }) {
     }
   };
 
-  if (orderNumber) {
+  if (completedOrder) {
     return (
       <Container className="pt-16 pb-24">
         <h1 className="font-display text-4xl leading-tight sm:text-5xl">Заказ отправлен</h1>
         <p className="mt-4 max-w-md text-sm text-ink-muted">
-          Номер заказа <span className="text-ink">{orderNumber}</span>. Мы проверим перевод и напишем вам, чтобы
-          подтвердить доставку.
+          {completedOrder.number ? (
+            <>
+              Номер заказа <span className="text-ink">{completedOrder.number}</span>.{" "}
+            </>
+          ) : null}
+          Мы проверим перевод и напишем вам, чтобы подтвердить доставку.
         </p>
         <Link
           href="/"
@@ -97,7 +99,7 @@ export function CheckoutForm({ payment }: { payment: PaymentView }) {
     return (
       <Container className="pt-16 pb-24">
         <h1 className="font-display text-4xl leading-tight sm:text-5xl">Оформление</h1>
-        <p className="mt-4 text-sm text-ink-muted">Корзина пуста — сначала выберите вещи.</p>
+        <p className="mt-4 text-sm text-ink-muted">Корзина пуста. Сначала выберите вещи.</p>
         <Link
           href="/"
           className="mt-8 inline-block rounded-full bg-accent px-8 py-3 text-sm text-accent-contrast transition-opacity hover:opacity-90"
@@ -193,12 +195,12 @@ export function CheckoutForm({ payment }: { payment: PaymentView }) {
               ) : null}
 
               <p className="mt-4 text-xs text-ink-muted">
-                Переведите {formatPrice(totalMinor)} и приложите скриншот перевода — он придёт нам вместе с заказом.
+                Переведите {formatPrice(totalMinor)} и приложите скриншот перевода. Он придёт нам вместе с заказом.
               </p>
             </div>
           ) : (
             <p className="text-sm text-ink-muted">
-              Реквизиты для перевода ещё не настроены. Напишите нам — оформим заказ вручную.
+              Реквизиты для перевода ещё не настроены. Напишите нам, оформим заказ вручную.
             </p>
           )}
 
@@ -220,15 +222,17 @@ export function CheckoutForm({ payment }: { payment: PaymentView }) {
             />
           </div>
 
-          {error ? <p className="text-sm text-ink">{error}</p> : null}
+          <div className="mt-auto flex flex-col gap-4">
+            {error ? <p className="text-sm text-ink">{error}</p> : null}
 
-          <button
-            type="submit"
-            disabled={isSubmitting || payment === null}
-            className="rounded-full bg-accent py-3.5 text-sm text-accent-contrast transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-30"
-          >
-            {isSubmitting ? "Отправляем…" : "Отправить заказ"}
-          </button>
+            <button
+              type="submit"
+              disabled={isSubmitting || payment === null}
+              className="rounded-full bg-accent py-3.5 text-sm text-accent-contrast transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-30"
+            >
+              {isSubmitting ? "Отправляем…" : "Отправить заказ"}
+            </button>
+          </div>
         </aside>
       </form>
     </Container>
@@ -278,7 +282,7 @@ function readMessage(payload: unknown): string | null {
   return typeof message === "string" ? message : null;
 }
 
-function readOrderNumber(payload: unknown): string {
+function readOrderNumber(payload: unknown): string | null {
   if (typeof payload === "object" && payload !== null) {
     const value = (payload as Record<string, unknown>).orderNumber;
 
@@ -287,5 +291,5 @@ function readOrderNumber(payload: unknown): string {
     }
   }
 
-  return "—";
+  return null;
 }

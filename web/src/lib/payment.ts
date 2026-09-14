@@ -9,8 +9,8 @@ export type PaymentDetails = {
 };
 
 /**
- * Реквизиты для перевода. `null` означает, что магазин ещё не настроен —
- * страница оплаты покажет это честно, вместо пустых полей.
+ * Реквизиты для перевода. `null` означает, что магазин ещё не настроен,
+ * и страница оплаты скажет об этом честно, вместо пустых полей.
  */
 export function getPaymentDetails(): PaymentDetails | null {
   const { PAYMENT_CARD_NUMBER, PAYMENT_CARD_HOLDER, PAYMENT_BANK } = serverEnv();

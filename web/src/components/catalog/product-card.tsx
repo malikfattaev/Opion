@@ -43,7 +43,7 @@ export function ProductCard({ product }: { product: Product }) {
   );
 }
 
-/** Пока съёмки нет — вместо картинки ровный прямоугольник, а не битая иконка. */
+/** Пока съёмки нет, вместо картинки ровный прямоугольник, а не битая иконка. */
 function CoverPlaceholder() {
   return (
     <div className="flex h-full w-full items-center justify-center">

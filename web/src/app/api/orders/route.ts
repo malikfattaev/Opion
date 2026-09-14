@@ -8,7 +8,7 @@ import {
 } from "@/lib/orders/schema";
 import { sendOrderPhoto } from "@/lib/telegram";
 
-/** Заказ уходит в Telegram в момент запроса — кешировать здесь нечего. */
+/** Заказ уходит в Telegram в момент запроса, кешировать здесь нечего. */
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
@@ -44,7 +44,7 @@ export async function POST(request: Request) {
   }
 
   if (screenshot.size > MAX_SCREENSHOT_BYTES) {
-    return fail("Скриншот тяжелее 10 МБ — сожмите его или сделайте заново.", 400);
+    return fail("Скриншот тяжелее 10 МБ. Сожмите его или сделайте заново.", 400);
   }
 
   // Цены берём из каталога, а не из присланной корзины: клиент мог их подменить.
@@ -80,7 +80,7 @@ export async function POST(request: Request) {
   if (!sent.ok) {
     console.error("Заказ не доставлен в Telegram:", sent.reason);
 
-    return fail("Не получилось отправить заказ. Напишите нам в Telegram — мы оформим вручную.", 502);
+    return fail("Не получилось отправить заказ. Напишите нам в Telegram, оформим вручную.", 502);
   }
 
   return Response.json({ orderNumber, totalMinor });
@@ -90,7 +90,7 @@ function readOptional(value: FormDataEntryValue | null): string | undefined {
   return typeof value === "string" && value.trim() !== "" ? value : undefined;
 }
 
-/** Состав заказа приходит строкой JSON — форма не умеет отправлять вложенные объекты. */
+/** Состав заказа приходит строкой JSON: форма не умеет отправлять вложенные объекты. */
 function readItems(value: FormDataEntryValue | null): OrderItemInput[] | undefined {
   if (typeof value !== "string") {
     return undefined;

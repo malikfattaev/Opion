@@ -15,7 +15,7 @@ export function createOrderNumber(now: Date = new Date()): string {
 }
 
 /**
- * Подпись к скриншоту оплаты. Размечена HTML — тем же parse_mode, что и в отправке.
+ * Подпись к скриншоту оплаты. Размечена HTML, тем же parse_mode, что и в отправке.
  * Любые данные покупателя экранируются: иначе символ «<» в адресе развалит разметку.
  */
 export function buildOrderCaption({
@@ -30,7 +30,7 @@ export function buildOrderCaption({
   totalMinor: number;
 }): string {
   const items = lines
-    .map((line) => `• ${escapeHtml(line.name)} — ${escapeHtml(line.size)} × ${line.quantity} — ${formatPrice(line.unitPriceMinor * line.quantity)}`)
+    .map((line) => `• ${escapeHtml(line.name)}, ${escapeHtml(line.size)} × ${line.quantity} · ${formatPrice(line.unitPriceMinor * line.quantity)}`)
     .join("\n");
 
   const rows = [

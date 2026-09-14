@@ -3,7 +3,7 @@ import { z } from "zod";
 /**
  * Единая точка валидации переменных окружения.
  *
- * Публичные (`NEXT_PUBLIC_*`) читаются буквально — иначе Next.js не подставит
+ * Публичные (`NEXT_PUBLIC_*`) читаются буквально, иначе Next.js не подставит
  * их значения в клиентский бандл на этапе сборки. Серверные проверяются лениво,
  * при первом обращении, чтобы сборка не падала там, где доступ к базе не нужен.
  */
@@ -79,7 +79,7 @@ let cachedServerEnv: ServerEnv | undefined;
 
 export function serverEnv(): ServerEnv {
   if (typeof window !== "undefined") {
-    throw new Error("serverEnv() недоступен в браузере — используйте publicEnv.");
+    throw new Error("serverEnv() недоступен в браузере, используйте publicEnv.");
   }
 
   cachedServerEnv ??= parseEnv(serverEnvSchema, process.env, "серверные");

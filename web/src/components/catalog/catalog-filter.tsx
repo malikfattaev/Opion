@@ -73,7 +73,7 @@ export function CatalogFilter({
 
     const query = params.toString();
 
-    // scroll: false — иначе страница прыгает наверх на каждом переключении.
+    // scroll: false, иначе страница прыгает наверх на каждом переключении.
     router.push(query ? `/?${query}` : "/", { scroll: false });
   };
 

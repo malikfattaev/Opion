@@ -4,7 +4,7 @@ import type { Product, ProductStyle, ProductType } from "./types";
 
 /**
  * Временные данные, чтобы витрина была видимой до подключения базы.
- * Заменяются запросами к PostgreSQL — точка замены одна, `lib/catalog/index.ts`.
+ * Заменяются запросами к PostgreSQL, точка замены одна: `lib/catalog/index.ts`.
  */
 
 export const placeholderTypes: readonly ProductType[] = [
