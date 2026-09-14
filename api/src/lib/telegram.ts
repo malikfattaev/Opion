@@ -12,7 +12,7 @@ export type TelegramSendResult = { ok: true } | { ok: false; reason: string };
  * Telegram Bot API: https://core.telegram.org/bots/api#sendphoto
  */
 export async function sendOrderPhoto({ photo, caption }: { photo: File; caption: string }): Promise<TelegramSendResult> {
-  const { TELEGRAM_BOT_TOKEN, TELEGRAM_ORDERS_CHAT_ID } = serverEnv();
+  const { TELEGRAM_BOT_TOKEN, TELEGRAM_ORDERS_CHAT_ID, TELEGRAM_ORDERS_THREAD_ID } = serverEnv();
 
   if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_ORDERS_CHAT_ID) {
     return { ok: false, reason: "Приём заказов не настроен: нет токена бота или идентификатора группы." };
@@ -23,6 +23,10 @@ export async function sendOrderPhoto({ photo, caption }: { photo: File; caption:
   body.set("caption", truncate(caption, MAX_CAPTION_LENGTH));
   body.set("parse_mode", "HTML");
   body.set("photo", photo, photo.name || "payment.jpg");
+
+  if (TELEGRAM_ORDERS_THREAD_ID !== undefined) {
+    body.set("message_thread_id", String(TELEGRAM_ORDERS_THREAD_ID));
+  }
 
   try {
     const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, {

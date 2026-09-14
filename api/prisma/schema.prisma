@@ -1,5 +1,4 @@
-// Схема базы данных OPIØN.
-// Модели добавим, когда определимся с каталогом и заказами.
+// Схема базы данных OPIØN: каталог, заказы, закупки и команда.
 // Документация: https://pris.ly/d/prisma-schema
 
 generator client {
@@ -9,4 +8,192 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+/// Тип вещи: худи, джинсы, футболка. У товара ровно один.
+model ProductType {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  name      String
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  products Product[]
+
+  @@index([position])
+}
+
+/// Стиль: y2k, нефор, стритвир. У товара их может быть несколько.
+model Style {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  name      String
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  products ProductStyle[]
+
+  @@index([position])
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  description String
+  /// Цена в сумах, целым числом: тийины не в обороте.
+  price       Int
+  /// Старая цена для зачёркивания, если товар со скидкой.
+  comparePrice Int?
+  sizes       String[]
+  isPublished Boolean  @default(true)
+  position    Int      @default(0)
+  typeId      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  type       ProductType    @relation(fields: [typeId], references: [id], onDelete: Restrict)
+  styles     ProductStyle[]
+  images     ProductImage[]
+  orderItems OrderItem[]
+
+  @@index([typeId])
+  @@index([isPublished, position])
+}
+
+/// Связка товара со стилями: многие ко многим.
+model ProductStyle {
+  productId String
+  styleId   String
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  style   Style   @relation(fields: [styleId], references: [id], onDelete: Cascade)
+
+  @@id([productId, styleId])
+  @@index([styleId])
+}
+
+model ProductImage {
+  id        String   @id @default(cuid())
+  productId String
+  url       String
+  alt       String   @default("")
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId, position])
+}
+
+/// Откуда пришёл заказ: витрина, мини-апп или занесли руками.
+enum OrderSource {
+  WEBSITE
+  MINI_APP
+  MANUAL
+}
+
+enum OrderStatus {
+  NEW
+  PAID
+  SHIPPED
+  DONE
+  CANCELLED
+}
+
+model Order {
+  id               String      @id @default(cuid())
+  number           String      @unique
+  source           OrderSource
+  status           OrderStatus @default(NEW)
+  firstName        String
+  lastName         String
+  phone            String
+  address          String
+  comment          String?
+  /// Сумма на момент оформления: каталог потом может подорожать.
+  total            Int
+  telegramUserId   String?
+  telegramUsername String?
+  /// file_id скриншота перевода в Telegram, чтобы поднять чек из админки.
+  screenshotFileId String?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  items OrderItem[]
+
+  @@index([status, createdAt])
+  @@index([createdAt])
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  productId String?
+  /// Название и цена копиями: товар могут удалить или переименовать.
+  name      String
+  size      String
+  quantity  Int
+  unitPrice Int
+
+  order   Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+/// Закупки: что магазин купил сам. Заносится вручную из админки.
+model Purchase {
+  id          String   @id @default(cuid())
+  title       String
+  supplier    String?
+  quantity    Int      @default(1)
+  /// Цена за единицу в сумах.
+  unitCost    Int
+  note        String?
+  purchasedAt DateTime
+  createdById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  createdBy TeamMember? @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([purchasedAt])
+}
+
+enum TeamRole {
+  OWNER
+  MANAGER
+}
+
+/// Раздел «Команда»: у кого есть доступ в админку.
+model TeamMember {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  passwordHash String
+  name         String
+  role         TeamRole @default(MANAGER)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  sessions  Session[]
+  purchases Purchase[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  /// Храним хеш токена: утечка таблицы не должна давать вход.
+  tokenHash String   @unique
+  memberId  String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  member TeamMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([memberId])
+  @@index([expiresAt])
 }

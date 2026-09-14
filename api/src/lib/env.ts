@@ -21,6 +21,8 @@ const serverEnvSchema = z.object({
   /** Приём заказов. Без них витрина работает, но оформление заблокировано. */
   TELEGRAM_BOT_TOKEN: z.string().min(1).optional(),
   TELEGRAM_ORDERS_CHAT_ID: z.string().min(1).optional(),
+  /** Топик форума, если группа заказов разбита на темы. */
+  TELEGRAM_ORDERS_THREAD_ID: z.coerce.number().int().positive().optional(),
 
   /** Реквизиты для перевода, которые видит покупатель. */
   PAYMENT_CARD_NUMBER: z.string().min(1).optional(),
