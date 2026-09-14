@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { CartIcon, CloseIcon, MenuIcon } from "@/components/icons";
+import { CartIcon, CloseIcon, GridIcon, MenuIcon } from "@/components/icons";
 import { moreLinks } from "@/config/site";
 import { useCart } from "@/lib/cart/use-cart";
 import { haptic } from "@/lib/telegram/use-telegram";
@@ -19,6 +19,7 @@ export function AppDock() {
   const { isReady, totalQuantity } = useCart();
   const [isMoreOpen, setIsMoreOpen] = useState(false);
 
+  const isCatalogActive = pathname === "/" || pathname.startsWith("/product/");
   const isCartActive = pathname === "/cart" || pathname === "/checkout";
   const isMoreActive = moreLinks.some((link) => pathname.startsWith(link.href));
 
@@ -46,6 +47,18 @@ export function AppDock() {
     <>
       <nav className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center pb-[max(0.75rem,env(safe-area-inset-bottom))]">
         <div className="pointer-events-auto flex items-center gap-1 rounded-full border border-line bg-surface/95 p-1.5 backdrop-blur">
+          <Link
+            href="/"
+            onClick={() => haptic()}
+            aria-label="Каталог"
+            aria-current={isCatalogActive ? "page" : undefined}
+            className={`flex size-12 items-center justify-center rounded-full transition-colors ${
+              isCatalogActive ? "bg-accent text-accent-contrast" : "text-ink-muted active:bg-canvas"
+            }`}
+          >
+            <GridIcon />
+          </Link>
+
           <Link
             href="/cart"
             onClick={() => haptic()}

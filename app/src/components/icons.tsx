@@ -38,6 +38,17 @@ export function SlidersIcon({ className = "size-5" }: IconProps) {
   );
 }
 
+export function GridIcon({ className = "size-5" }: IconProps) {
+  return (
+    <svg {...baseProps} className={className}>
+      <rect x="4" y="4" width="7" height="7" rx="1.5" />
+      <rect x="13" y="4" width="7" height="7" rx="1.5" />
+      <rect x="4" y="13" width="7" height="7" rx="1.5" />
+      <rect x="13" y="13" width="7" height="7" rx="1.5" />
+    </svg>
+  );
+}
+
 export function MenuIcon({ className = "size-5" }: IconProps) {
   return (
     <svg {...baseProps} className={className}>
