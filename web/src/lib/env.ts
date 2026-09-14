@@ -27,8 +27,12 @@ const serverEnvSchema = z.object({
 type PublicEnv = z.infer<typeof publicEnvSchema>;
 type ServerEnv = z.infer<typeof serverEnvSchema>;
 
-function parseEnv<Schema extends z.ZodType>(schema: Schema, source: unknown, scope: string): z.infer<Schema> {
-  const result = schema.safeParse(source);
+function parseEnv<Schema extends z.ZodType>(
+  schema: Schema,
+  source: Record<string, string | undefined>,
+  scope: string,
+): z.infer<Schema> {
+  const result = schema.safeParse(withoutBlankValues(source));
 
   if (!result.success) {
     const details = result.error.issues
@@ -39,6 +43,16 @@ function parseEnv<Schema extends z.ZodType>(schema: Schema, source: unknown, sco
   }
 
   return result.data;
+}
+
+/**
+ * `FOO=` в .env даёт пустую строку, а не отсутствие переменной, и optional-поля
+ * на ней спотыкаются. Приводим пустые значения к undefined до разбора схемы.
+ */
+function withoutBlankValues(source: Record<string, string | undefined>): Record<string, string | undefined> {
+  return Object.fromEntries(
+    Object.entries(source).map(([key, value]) => [key, value?.trim() === "" ? undefined : value]),
+  );
 }
 
 export const publicEnv: PublicEnv = parseEnv(

@@ -67,5 +67,8 @@ Thumbs.db
 
 # Скилы Prisma CLI — ставятся локально командой `prisma init`
 .agents/
-.claude/
+**/.claude/skills/
 skills-lock.json
+
+# macOS
+.DS_Store
