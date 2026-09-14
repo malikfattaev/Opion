@@ -9,7 +9,7 @@ export function Logo({ height = brand.logo.headerHeight }: { height?: number }) 
   return (
     <Image
       src={src}
-      alt={siteConfig.name}
+      alt={siteConfig.wordmark}
       width={width}
       height={intrinsicHeight}
       priority

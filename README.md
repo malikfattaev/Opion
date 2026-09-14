@@ -1,4 +1,4 @@
-# Opion
+# OPIØN
 
 Магазин одежды Opion: сайт, Telegram Mini App и общее хранилище медиа.
 
