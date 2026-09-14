@@ -31,7 +31,7 @@ export function AddToCart({ product }: { product: Product }) {
   return (
     /* Панель стоит в конце страницы, а не липнет к низу: снизу уже плавает док,
        и две накладки друг на друге выглядели бы месивом. */
-    <div className="-mx-5 mt-8 border-t border-line px-5 pt-4">
+    <div className="-mx-5 mt-6 border-t border-line px-5 pt-4">
       <fieldset>
         <legend className="sr-only">Размер</legend>
 
@@ -63,7 +63,7 @@ export function AddToCart({ product }: { product: Product }) {
         type="button"
         onClick={handleAdd}
         disabled={selectedSize === null}
-        className="mt-3 w-full rounded-full bg-accent py-3.5 text-sm text-accent-contrast active:opacity-80 disabled:opacity-30"
+        className="mt-4 w-full rounded-full bg-accent py-3.5 text-sm text-accent-contrast transition-opacity active:opacity-80 disabled:opacity-30"
       >
         {selectedSize === null ? "Выберите размер" : "В корзину"}
       </button>

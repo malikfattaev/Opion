@@ -26,7 +26,7 @@ export default async function ProductPage({ params }: PageProps<"/product/[slug]
 
   return (
     <div className="flex min-h-full flex-col px-5">
-      <div className="relative aspect-3/4 overflow-hidden rounded-2xl bg-surface">
+      <div className="relative aspect-4/5 overflow-hidden rounded-2xl bg-surface">
         {cover ? (
           <Image src={cover.url} alt={cover.alt} fill sizes="100vw" className="object-cover" priority />
         ) : (
@@ -36,16 +36,16 @@ export default async function ProductPage({ params }: PageProps<"/product/[slug]
         )}
       </div>
 
-      <h1 className="font-display mt-5 text-3xl leading-tight">{product.name}</h1>
+      <h1 className="font-display mt-5 text-2xl leading-tight">{product.name}</h1>
 
-      <p className="mt-2 text-lg">
+      <p className="mt-2 text-lg tabular-nums">
         {hasDiscount ? (
           <span className="mr-2 text-ink-muted line-through">{formatPrice(product.compareAtPrice!)}</span>
         ) : null}
         {formatPrice(product.price)}
       </p>
 
-      <p className="mt-4 text-sm text-ink-muted">{product.description}</p>
+      <p className="mt-4 text-sm leading-relaxed text-ink-muted">{product.description}</p>
 
       <div className="mt-auto">
         <AddToCart product={product} />

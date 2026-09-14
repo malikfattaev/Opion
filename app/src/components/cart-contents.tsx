@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 
+import { PageTitle } from "@/components/page-title";
 import { useCart } from "@/lib/cart/use-cart";
 import { cartLineKey } from "@/lib/cart/types";
 import { formatPrice } from "@/lib/money";
@@ -17,8 +18,8 @@ export function CartContents() {
 
   if (lines.length === 0) {
     return (
-      <div className="flex flex-col items-center px-5 pt-24 text-center">
-        <p className="font-display text-2xl">Корзина пуста</p>
+      <div className="flex flex-col items-center px-5 pt-20 text-center">
+        <p className="font-display text-2xl leading-tight">Корзина пуста</p>
         <p className="mt-2 text-sm text-ink-muted">Выберите что-нибудь в каталоге.</p>
       </div>
     );
@@ -26,7 +27,7 @@ export function CartContents() {
 
   return (
     <div className="flex min-h-full flex-col px-5">
-      <h1 className="font-display text-3xl">Корзина</h1>
+      <PageTitle>Корзина</PageTitle>
 
       <ul className="mt-6 divide-y divide-line border-y border-line">
         {lines.map((line) => {

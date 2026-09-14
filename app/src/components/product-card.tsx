@@ -9,7 +9,7 @@ export function ProductCard({ product, priority = false }: { product: Product; p
   const hasDiscount = product.compareAtPrice !== undefined && product.compareAtPrice > product.price;
 
   return (
-    <Link href={`/product/${product.slug}`} className="block active:opacity-70">
+    <Link href={`/product/${product.slug}`} className="block transition-opacity active:opacity-60">
       <div className="relative aspect-4/5 overflow-hidden rounded-xl bg-surface">
         {cover ? (
           <Image src={cover.url} alt={cover.alt} fill sizes="50vw" className="object-cover" priority={priority} />

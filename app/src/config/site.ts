@@ -10,7 +10,7 @@ export const appConfig = {
     width: 1200,
     height: 481,
     /** Высота в шапке. Ширина считается по пропорции. */
-    headerHeight: 30,
+    headerHeight: 36,
   },
   /** Сколько вещей показываем на одной странице каталога. */
   productsPerPage: 6,

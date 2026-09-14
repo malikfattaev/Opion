@@ -4,8 +4,18 @@
  */
 export type TelegramHapticStyle = "light" | "medium" | "heavy" | "rigid" | "soft";
 
+/** Профиль покупателя из Telegram. Не подписан, поэтому годится только для показа. */
+export type TelegramProfile = {
+  id: number;
+  first_name: string;
+  last_name?: string;
+  username?: string;
+  photo_url?: string;
+};
+
 export type TelegramWebApp = {
   initData: string;
+  initDataUnsafe?: { user?: TelegramProfile };
   version: string;
   colorScheme: "light" | "dark";
   ready: () => void;

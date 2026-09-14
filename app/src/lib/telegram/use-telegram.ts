@@ -3,7 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useSyncExternalStore } from "react";
 
-import type { TelegramHapticStyle, TelegramWebApp } from "./types";
+import type { TelegramHapticStyle, TelegramProfile, TelegramWebApp } from "./types";
 
 /**
  * Скрипт Telegram грузится отдельно от React, поэтому объект появляется не сразу.
@@ -60,6 +60,14 @@ function getServerSnapshot(): TelegramWebApp | null {
 
 export function useTelegram(): TelegramWebApp | null {
   return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+}
+
+/**
+ * Профиль для показа: имя и аватар. Подписью он не защищён, поэтому решения
+ * на его основе принимает только интерфейс, но не API.
+ */
+export function useTelegramProfile(): TelegramProfile | null {
+  return useTelegram()?.initDataUnsafe?.user ?? null;
 }
 
 /** Короткий отклик на нажатие: в вебвью это заметно приятнее, чем без него. */

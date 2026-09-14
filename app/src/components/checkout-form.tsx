@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState, type FormEvent } from "react";
 
+import { PageTitle } from "@/components/page-title";
 import { useCart } from "@/lib/cart/use-cart";
 import { formatPrice } from "@/lib/money";
 import { submitOrder, type PublicOrder } from "@/lib/orders/api";
@@ -66,8 +67,8 @@ export function CheckoutForm({ payment }: { payment: PaymentDetails | null }) {
 
   if (completed) {
     return (
-      <div className="flex flex-col items-center px-5 pt-24 text-center">
-        <p className="font-display text-3xl">Заказ отправлен</p>
+      <div className="flex flex-col items-center px-5 pt-20 text-center">
+        <p className="font-display text-3xl leading-tight">Заказ отправлен</p>
         <p className="mt-3 max-w-xs text-sm text-ink-muted">
           Номер заказа <span className="text-ink">{completed.number}</span>. Проверим перевод и подтвердим его.
         </p>
@@ -87,8 +88,8 @@ export function CheckoutForm({ payment }: { payment: PaymentDetails | null }) {
 
   if (lines.length === 0) {
     return (
-      <div className="flex flex-col items-center px-5 pt-24 text-center">
-        <p className="font-display text-2xl">Корзина пуста</p>
+      <div className="flex flex-col items-center px-5 pt-20 text-center">
+        <p className="font-display text-2xl leading-tight">Корзина пуста</p>
         <p className="mt-2 text-sm text-ink-muted">Выберите что-нибудь в каталоге.</p>
       </div>
     );
@@ -96,7 +97,7 @@ export function CheckoutForm({ payment }: { payment: PaymentDetails | null }) {
 
   return (
     <form onSubmit={handleSubmit} className="flex min-h-full flex-col px-5">
-      <h1 className="font-display text-3xl">Оформление</h1>
+      <PageTitle>Оформление</PageTitle>
 
       <div className="mt-6 flex flex-col gap-4">
         <Field name="firstName" label="Имя" autoComplete="given-name" required />

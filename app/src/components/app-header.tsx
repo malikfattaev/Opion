@@ -12,7 +12,7 @@ import { haptic } from "@/lib/telegram/use-telegram";
  */
 export function AppHeader() {
   return (
-    <header className="flex h-16 shrink-0 items-center justify-center px-5">
+    <header className="flex h-18 shrink-0 items-center justify-center px-5">
       <Link href="/" onClick={() => haptic()} aria-label={`${appConfig.wordmark}, в каталог`}>
         <Image
           src={appConfig.logo.src}
