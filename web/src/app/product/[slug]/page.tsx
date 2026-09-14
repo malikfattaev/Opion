@@ -30,7 +30,7 @@ export default async function ProductPage({ params }: PageProps<"/product/[slug]
 
   const [cover] = product.images;
   const hasDiscount =
-    product.compareAtPriceMinor !== undefined && product.compareAtPriceMinor > product.priceMinor;
+    product.compareAtPrice !== undefined && product.compareAtPrice > product.price;
 
   return (
     /**
@@ -65,9 +65,9 @@ export default async function ProductPage({ params }: PageProps<"/product/[slug]
 
             <p className="mt-4 text-lg">
               {hasDiscount ? (
-                <span className="mr-3 text-ink-muted line-through">{formatPrice(product.compareAtPriceMinor!)}</span>
+                <span className="mr-3 text-ink-muted line-through">{formatPrice(product.compareAtPrice!)}</span>
               ) : null}
-              <span>{formatPrice(product.priceMinor)}</span>
+              <span>{formatPrice(product.price)}</span>
             </p>
 
             <p className="mt-6 max-w-md text-sm text-ink-muted">{product.description}</p>

@@ -142,8 +142,8 @@ function isCartLine(value: unknown): value is CartLine {
     typeof line.productSlug === "string" &&
     typeof line.name === "string" &&
     typeof line.size === "string" &&
-    typeof line.priceMinor === "number" &&
-    Number.isFinite(line.priceMinor) &&
+    typeof line.price === "number" &&
+    Number.isFinite(line.price) &&
     typeof line.quantity === "number" &&
     line.quantity > 0
   );

@@ -7,7 +7,7 @@ export type CartLine = {
   productSlug: string;
   name: string;
   size: string;
-  priceMinor: number;
+  price: number;
   quantity: number;
 };
 

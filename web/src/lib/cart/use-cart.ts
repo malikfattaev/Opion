@@ -11,7 +11,7 @@ export function useCart() {
     lines,
     isReady,
     totalQuantity: lines.reduce((sum, line) => sum + line.quantity, 0),
-    totalMinor: lines.reduce((sum, line) => sum + line.priceMinor * line.quantity, 0),
+    total: lines.reduce((sum, line) => sum + line.price * line.quantity, 0),
     addLine,
     setQuantity,
     removeLine,

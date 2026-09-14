@@ -24,8 +24,10 @@ export function SiteHeader() {
   return (
     <header className="relative z-50 pt-4 sm:pt-6">
       <Container>
-        <div className="flex h-14 items-center justify-between gap-6 rounded-full border border-line bg-surface px-5 sm:px-7">
-          <Link href="/" aria-label="На главную" onClick={closeMenu} className="shrink-0">
+        {/* Три колонки вместо flex: боковые получают одинаковую ширину, поэтому
+            навигация стоит ровно по центру и не съезжает от длины логотипа. */}
+        <div className="grid h-14 grid-cols-[1fr_auto_1fr] items-center gap-4 rounded-full border border-line bg-surface px-5 sm:px-7">
+          <Link href="/" aria-label="На главную" onClick={closeMenu} className="justify-self-start">
             <Logo />
           </Link>
 
@@ -41,7 +43,7 @@ export function SiteHeader() {
             </ul>
           </nav>
 
-          <div className="flex items-center gap-1">
+          <div className="col-start-3 flex items-center gap-1 justify-self-end">
             <IconLink item={CART_ITEM} isActive={isActiveItem(pathname, CART_ITEM)} onClick={closeMenu}>
               <CartIcon />
               {/* Счётчик появляется только после чтения localStorage, иначе

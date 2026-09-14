@@ -11,7 +11,7 @@ const CONFIRMATION_MS = 2000;
 export function AddToCartForm({
   product,
 }: {
-  product: Pick<Product, "slug" | "name" | "priceMinor" | "sizes">;
+  product: Pick<Product, "slug" | "name" | "price" | "sizes">;
 }) {
   const { addLine, totalQuantity } = useCart();
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
@@ -37,7 +37,7 @@ export function AddToCartForm({
       productSlug: product.slug,
       name: product.name,
       size: selectedSize,
-      priceMinor: product.priceMinor,
+      price: product.price,
     });
     setJustAdded(true);
   };

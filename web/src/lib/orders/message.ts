@@ -6,7 +6,7 @@ export type ResolvedOrderLine = {
   name: string;
   size: string;
   quantity: number;
-  unitPriceMinor: number;
+  unitPrice: number;
 };
 
 /** Короткий номер, который называют покупателю и ищут в переписке. */
@@ -22,15 +22,15 @@ export function buildOrderCaption({
   orderNumber,
   order,
   lines,
-  totalMinor,
+  total,
 }: {
   orderNumber: string;
   order: OrderRequest;
   lines: readonly ResolvedOrderLine[];
-  totalMinor: number;
+  total: number;
 }): string {
   const items = lines
-    .map((line) => `• ${escapeHtml(line.name)}, ${escapeHtml(line.size)} × ${line.quantity} · ${formatPrice(line.unitPriceMinor * line.quantity)}`)
+    .map((line) => `• ${escapeHtml(line.name)}, ${escapeHtml(line.size)} × ${line.quantity} · ${formatPrice(line.unitPrice * line.quantity)}`)
     .join("\n");
 
   const rows = [
@@ -45,7 +45,7 @@ export function buildOrderCaption({
     rows.push(`<b>Комментарий:</b> ${escapeHtml(order.comment)}`);
   }
 
-  rows.push("", items, "", `<b>Итого: ${formatPrice(totalMinor)}</b>`);
+  rows.push("", items, "", `<b>Итого: ${formatPrice(total)}</b>`);
 
   return rows.join("\n");
 }

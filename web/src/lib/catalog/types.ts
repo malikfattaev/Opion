@@ -22,9 +22,9 @@ export type Product = {
   typeSlug: string;
   styleSlugs: readonly string[];
   /** Цена в минорных единицах, см. lib/money.ts */
-  priceMinor: number;
+  price: number;
   /** Зачёркнутая старая цена, если товар со скидкой. */
-  compareAtPriceMinor?: number;
+  compareAtPrice?: number;
   sizes: readonly string[];
   images: readonly ProductImage[];
 };

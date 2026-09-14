@@ -8,7 +8,7 @@ import { cartLineKey } from "@/lib/cart/types";
 import { formatPrice } from "@/lib/money";
 
 export function CartContents() {
-  const { lines, isReady, totalMinor, setQuantity, removeLine } = useCart();
+  const { lines, isReady, total, setQuantity, removeLine } = useCart();
 
   // До чтения localStorage содержимое корзины неизвестно: показать «пусто»
   // в этот момент значило бы соврать.
@@ -65,7 +65,7 @@ export function CartContents() {
               </div>
 
               <p className="w-28 text-right text-sm tabular-nums">
-                {formatPrice(line.priceMinor * line.quantity)}
+                {formatPrice(line.price * line.quantity)}
               </p>
 
               <button
@@ -82,7 +82,7 @@ export function CartContents() {
 
       <div className="mt-8 flex flex-wrap items-center justify-between gap-6">
         <p className="text-lg">
-          Итого <span className="tabular-nums">{formatPrice(totalMinor)}</span>
+          Итого <span className="tabular-nums">{formatPrice(total)}</span>
         </p>
 
         <Link

@@ -16,7 +16,7 @@ export type PaymentView = {
 const COPY_FEEDBACK_MS = 2000;
 
 export function CheckoutForm({ payment }: { payment: PaymentView }) {
-  const { lines, isReady, totalMinor, clear } = useCart();
+  const { lines, isReady, total, clear } = useCart();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -159,14 +159,14 @@ export function CheckoutForm({ payment }: { payment: PaymentView }) {
                       · {line.size} × {line.quantity}
                     </span>
                   </span>
-                  <span className="shrink-0 tabular-nums">{formatPrice(line.priceMinor * line.quantity)}</span>
+                  <span className="shrink-0 tabular-nums">{formatPrice(line.price * line.quantity)}</span>
                 </li>
               ))}
             </ul>
 
             <p className="mt-5 flex justify-between border-t border-line pt-5 text-base">
               <span>Итого</span>
-              <span className="tabular-nums">{formatPrice(totalMinor)}</span>
+              <span className="tabular-nums">{formatPrice(total)}</span>
             </p>
           </div>
 
@@ -195,7 +195,7 @@ export function CheckoutForm({ payment }: { payment: PaymentView }) {
               ) : null}
 
               <p className="mt-4 text-xs text-ink-muted">
-                Переведите {formatPrice(totalMinor)} и приложите скриншот перевода. Он придёт нам вместе с заказом.
+                Переведите {formatPrice(total)} и приложите скриншот перевода. Он придёт нам вместе с заказом.
               </p>
             </div>
           ) : (

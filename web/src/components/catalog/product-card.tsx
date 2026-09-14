@@ -7,7 +7,7 @@ import { formatPrice } from "@/lib/money";
 export function ProductCard({ product }: { product: Product }) {
   const [cover] = product.images;
   const hasDiscount =
-    product.compareAtPriceMinor !== undefined && product.compareAtPriceMinor > product.priceMinor;
+    product.compareAtPrice !== undefined && product.compareAtPrice > product.price;
 
   return (
     <Link href={`/product/${product.slug}`} className="group block">
@@ -34,9 +34,9 @@ export function ProductCard({ product }: { product: Product }) {
 
         <p className="mt-1 text-sm">
           {hasDiscount ? (
-            <span className="mr-2 text-ink-muted line-through">{formatPrice(product.compareAtPriceMinor!)}</span>
+            <span className="mr-2 text-ink-muted line-through">{formatPrice(product.compareAtPrice!)}</span>
           ) : null}
-          <span className="text-ink">{formatPrice(product.priceMinor)}</span>
+          <span className="text-ink">{formatPrice(product.price)}</span>
         </p>
       </div>
     </Link>

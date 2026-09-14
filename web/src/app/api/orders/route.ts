@@ -65,16 +65,16 @@ export async function POST(request: Request) {
       name: product.name,
       size: item.size,
       quantity: item.quantity,
-      unitPriceMinor: product.priceMinor,
+      unitPrice: product.price,
     });
   }
 
-  const totalMinor = lines.reduce((sum, line) => sum + line.unitPriceMinor * line.quantity, 0);
+  const total = lines.reduce((sum, line) => sum + line.unitPrice * line.quantity, 0);
   const orderNumber = createOrderNumber();
 
   const sent = await sendOrderPhoto({
     photo: screenshot,
-    caption: buildOrderCaption({ orderNumber, order: parsed.data, lines, totalMinor }),
+    caption: buildOrderCaption({ orderNumber, order: parsed.data, lines, total }),
   });
 
   if (!sent.ok) {
@@ -83,7 +83,7 @@ export async function POST(request: Request) {
     return fail("Не получилось отправить заказ. Напишите нам в Telegram, оформим вручную.", 502);
   }
 
-  return Response.json({ orderNumber, totalMinor });
+  return Response.json({ orderNumber, total });
 }
 
 function readOptional(value: FormDataEntryValue | null): string | undefined {
