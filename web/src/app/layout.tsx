@@ -22,8 +22,8 @@ const display = Playfair_Display({
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: siteConfig.title,
-    template: `%s | ${siteConfig.name}`,
+    default: `${siteConfig.wordmark} | Каталог`,
+    template: `${siteConfig.wordmark} | %s`,
   },
   description: siteConfig.description,
   openGraph: {
