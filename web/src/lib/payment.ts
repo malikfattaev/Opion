@@ -1,34 +1,32 @@
-import "server-only";
+import { z } from "zod";
 
-import { serverEnv } from "@/lib/env";
+import { apiUrl } from "@/lib/env";
 
-export type PaymentDetails = {
-  cardNumber: string;
-  cardHolder?: string;
-  bank?: string;
-};
+/** Реквизиты приходят из API: номер карты хранится в его переменных окружения. */
+const paymentSchema = z.object({
+  payment: z
+    .object({
+      cardNumber: z.string(),
+      cardHolder: z.string().nullable(),
+      bank: z.string().nullable(),
+    })
+    .nullable(),
+});
 
-/**
- * Реквизиты для перевода. `null` означает, что магазин ещё не настроен,
- * и страница оплаты скажет об этом честно, вместо пустых полей.
- */
-export function getPaymentDetails(): PaymentDetails | null {
-  const { PAYMENT_CARD_NUMBER, PAYMENT_CARD_HOLDER, PAYMENT_BANK } = serverEnv();
+export type PaymentDetails = NonNullable<z.infer<typeof paymentSchema>["payment"]>;
 
-  if (!PAYMENT_CARD_NUMBER) {
+export async function getPaymentDetails(): Promise<PaymentDetails | null> {
+  try {
+    const response = await fetch(`${apiUrl}/payment`, { cache: "no-store" });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const parsed = paymentSchema.safeParse(await response.json());
+
+    return parsed.success ? parsed.data.payment : null;
+  } catch {
     return null;
   }
-
-  return {
-    cardNumber: PAYMENT_CARD_NUMBER,
-    cardHolder: PAYMENT_CARD_HOLDER,
-    bank: PAYMENT_BANK,
-  };
-}
-
-/** 2202202212345678 → 2202 2022 1234 5678: так номер проще перенести вручную. */
-export function formatCardNumber(cardNumber: string): string {
-  const digits = cardNumber.replace(/\D/g, "");
-
-  return digits.length === 0 ? cardNumber : (digits.match(/.{1,4}/g) ?? [digits]).join(" ");
 }

@@ -1,23 +1,15 @@
 import type { Metadata } from "next";
 
-import { CheckoutForm, type PaymentView } from "@/components/checkout/checkout-form";
-import { formatCardNumber, getPaymentDetails } from "@/lib/payment";
+import { CheckoutForm } from "@/components/checkout/checkout-form";
+import { getPaymentDetails } from "@/lib/payment";
 
 export const metadata: Metadata = { title: "Оформление заказа" };
 
-/** Реквизиты читаются из переменных окружения при каждом запросе, не при сборке. */
+/** Реквизиты запрашиваются у API при каждом заходе, а не на этапе сборки. */
 export const dynamic = "force-dynamic";
 
-export default function CheckoutPage() {
-  const details = getPaymentDetails();
-
-  const payment: PaymentView = details
-    ? {
-        cardNumber: formatCardNumber(details.cardNumber),
-        cardHolder: details.cardHolder,
-        bank: details.bank,
-      }
-    : null;
+export default async function CheckoutPage() {
+  const payment = await getPaymentDetails();
 
   return <CheckoutForm payment={payment} />;
 }

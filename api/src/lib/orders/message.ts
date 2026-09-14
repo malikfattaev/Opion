@@ -1,4 +1,5 @@
 import { formatPrice } from "@/lib/money";
+import type { TelegramUser } from "@/lib/telegram/init-data";
 
 import type { OrderRequest } from "./schema";
 
@@ -23,11 +24,13 @@ export function buildOrderCaption({
   order,
   lines,
   total,
+  telegramUser = null,
 }: {
   orderNumber: string;
   order: OrderRequest;
   lines: readonly ResolvedOrderLine[];
   total: number;
+  telegramUser?: TelegramUser | null;
 }): string {
   const items = lines
     .map((line) => `• ${escapeHtml(line.name)}, ${escapeHtml(line.size)} × ${line.quantity} · ${formatPrice(line.unitPrice * line.quantity)}`)
@@ -38,6 +41,7 @@ export function buildOrderCaption({
     "",
     `<b>Покупатель:</b> ${escapeHtml(`${order.firstName} ${order.lastName}`)}`,
     `<b>Телефон:</b> ${escapeHtml(order.phone)}`,
+    ...(telegramUser ? [`<b>Telegram:</b> ${formatTelegramUser(telegramUser)}`] : []),
     `<b>Адрес:</b> ${escapeHtml(order.address)}`,
   ];
 
@@ -48,6 +52,12 @@ export function buildOrderCaption({
   rows.push("", items, "", `<b>Итого: ${formatPrice(total)}</b>`);
 
   return rows.join("\n");
+}
+
+function formatTelegramUser(user: TelegramUser): string {
+  const name = escapeHtml([user.first_name, user.last_name].filter(Boolean).join(" "));
+
+  return user.username ? `${name} (@${escapeHtml(user.username)})` : `${name} (id ${user.id})`;
 }
 
 function escapeHtml(value: string): string {

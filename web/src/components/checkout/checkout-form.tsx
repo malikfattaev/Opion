@@ -5,17 +5,13 @@ import { useEffect, useState, type FormEvent } from "react";
 
 import { Container } from "@/components/layout/container";
 import { useCart } from "@/lib/cart/use-cart";
+import { apiUrl } from "@/lib/env";
+import type { PaymentDetails } from "@/lib/payment";
 import { formatPrice } from "@/lib/money";
-
-export type PaymentView = {
-  cardNumber: string;
-  cardHolder?: string;
-  bank?: string;
-} | null;
 
 const COPY_FEEDBACK_MS = 2000;
 
-export function CheckoutForm({ payment }: { payment: PaymentView }) {
+export function CheckoutForm({ payment }: { payment: PaymentDetails | null }) {
   const { lines, isReady, total, clear } = useCart();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -49,7 +45,7 @@ export function CheckoutForm({ payment }: { payment: PaymentView }) {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch("/api/orders", { method: "POST", body: formData });
+      const response = await fetch(`${apiUrl}/orders`, { method: "POST", body: formData });
       const payload: unknown = await response.json().catch(() => null);
 
       if (!response.ok) {

@@ -4,14 +4,11 @@ import { notFound } from "next/navigation";
 
 import { AddToCartForm } from "@/components/catalog/add-to-cart-form";
 import { Container } from "@/components/layout/container";
-import { getProductBySlug, getProducts } from "@/lib/catalog";
+import { getProductBySlug } from "@/lib/catalog";
 import { formatPrice } from "@/lib/money";
 
-export async function generateStaticParams() {
-  const products = await getProducts();
-
-  return products.map((product) => ({ slug: product.slug }));
-}
+/** Страницы товаров рендерятся по запросу и кешируются: на сборке API может быть недоступен. */
+export const revalidate = 60;
 
 export async function generateMetadata({ params }: PageProps<"/product/[slug]">): Promise<Metadata> {
   const { slug } = await params;

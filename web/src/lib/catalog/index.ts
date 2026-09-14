@@ -1,43 +1,79 @@
-import { placeholderProducts, placeholderStyles, placeholderTypes } from "./placeholder-data";
-import type { Product, ProductStyle, ProductType } from "./types";
+import { z } from "zod";
+
+import { apiUrl } from "@/lib/env";
+
+/** Каталог живёт в сервисе API. Сайт только читает его и своей копии не держит. */
+
+const optionSchema = z.object({ slug: z.string(), name: z.string() });
+
+const productSchema = z.object({
+  slug: z.string(),
+  name: z.string(),
+  description: z.string(),
+  typeSlug: z.string(),
+  styleSlugs: z.array(z.string()),
+  price: z.number(),
+  compareAtPrice: z.number().optional(),
+  sizes: z.array(z.string()),
+  images: z.array(z.object({ url: z.string(), alt: z.string() })),
+});
+
+const catalogSchema = z.object({
+  types: z.array(optionSchema),
+  styles: z.array(optionSchema),
+  products: z.array(productSchema),
+});
+
+export type ProductType = z.infer<typeof optionSchema>;
+export type ProductStyle = z.infer<typeof optionSchema>;
+export type Product = z.infer<typeof productSchema>;
+export type Catalog = z.infer<typeof catalogSchema>;
+
+const EMPTY_CATALOG: Catalog = { types: [], styles: [], products: [] };
 
 /**
- * Единственная дверь в каталог. Сейчас за ней временные данные, дальше будут
- * запросы к PostgreSQL через Prisma. Функции асинхронные именно поэтому:
- * при переходе на базу вызывающий код менять не придётся.
+ * Ответ кешируется на минуту: витрина открывается мгновенно, а правки в каталоге
+ * долетают достаточно быстро. Недоступный API даёт пустую витрину, а не ошибку.
  */
+export async function getCatalog(): Promise<Catalog> {
+  try {
+    const response = await fetch(`${apiUrl}/catalog`, { next: { revalidate: 60 } });
 
-export type ProductQuery = {
-  /** Пустой список означает «не фильтровать», а не «ничего не показывать». */
-  typeSlugs?: readonly string[];
-  styleSlugs?: readonly string[];
-  limit?: number;
-};
+    if (!response.ok) {
+      return EMPTY_CATALOG;
+    }
+
+    const parsed = catalogSchema.safeParse(await response.json());
+
+    return parsed.success ? parsed.data : EMPTY_CATALOG;
+  } catch {
+    return EMPTY_CATALOG;
+  }
+}
 
 export async function getProductTypes(): Promise<ProductType[]> {
-  return [...placeholderTypes];
+  return (await getCatalog()).types;
 }
 
 export async function getProductStyles(): Promise<ProductStyle[]> {
-  return [...placeholderStyles];
+  return (await getCatalog()).styles;
 }
 
-export async function getProductTypeBySlug(slug: string): Promise<ProductType | null> {
-  return placeholderTypes.find((type) => type.slug === slug) ?? null;
+export async function getProductBySlug(slug: string): Promise<Product | null> {
+  const { products } = await getCatalog();
+
+  return products.find((product) => product.slug === slug) ?? null;
 }
 
-export async function getProducts({ typeSlugs = [], styleSlugs = [], limit }: ProductQuery = {}): Promise<Product[]> {
-  const products = placeholderProducts.filter(
+export async function getProducts({
+  typeSlugs = [],
+  styleSlugs = [],
+}: { typeSlugs?: readonly string[]; styleSlugs?: readonly string[] } = {}): Promise<Product[]> {
+  const { products } = await getCatalog();
+
+  return products.filter(
     (product) =>
       (typeSlugs.length === 0 || typeSlugs.includes(product.typeSlug)) &&
       (styleSlugs.length === 0 || product.styleSlugs.some((slug) => styleSlugs.includes(slug))),
   );
-
-  return limit === undefined ? products : products.slice(0, limit);
 }
-
-export async function getProductBySlug(slug: string): Promise<Product | null> {
-  return placeholderProducts.find((product) => product.slug === slug) ?? null;
-}
-
-export type { Product, ProductStyle, ProductType } from "./types";
