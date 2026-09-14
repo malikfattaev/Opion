@@ -4,11 +4,19 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { CloseIcon } from "@/components/icons";
+import { siteConfig } from "@/config/site";
 import type { ProductStyle, ProductType } from "@/lib/catalog";
-import { countSelected, STYLE_PARAM, TYPE_PARAM, type CatalogFilters } from "@/lib/catalog/filters";
+import {
+  buildQuery,
+  countSelected,
+  EMPTY_FILTERS,
+  STYLE_PARAM,
+  TYPE_PARAM,
+  type CatalogFilters,
+} from "@/lib/catalog/filters";
 
-type FilterGroup = {
-  key: keyof CatalogFilters;
+type OptionGroup = {
+  key: "typeSlugs" | "styleSlugs";
   param: string;
   title: string;
   options: readonly { slug: string; name: string }[];
@@ -29,7 +37,7 @@ export function CatalogFilter({
 
   const selectedCount = countSelected(filters);
 
-  const groups: readonly FilterGroup[] = [
+  const groups: readonly OptionGroup[] = [
     { key: "typeSlugs", param: TYPE_PARAM, title: "Тип", options: types },
     { key: "styleSlugs", param: STYLE_PARAM, title: "Стиль", options: styles },
   ];
@@ -62,22 +70,13 @@ export function CatalogFilter({
   }, [isOpen]);
 
   const apply = (next: CatalogFilters) => {
-    const params = new URLSearchParams();
-
-    for (const slug of next.typeSlugs) {
-      params.append(TYPE_PARAM, slug);
-    }
-    for (const slug of next.styleSlugs) {
-      params.append(STYLE_PARAM, slug);
-    }
-
-    const query = params.toString();
+    const query = buildQuery(next);
 
     // scroll: false, иначе страница прыгает наверх на каждом переключении.
     router.push(query ? `/?${query}` : "/", { scroll: false });
   };
 
-  const toggleOption = (key: keyof CatalogFilters, slug: string) => {
+  const toggleOption = (key: OptionGroup["key"], slug: string) => {
     const selected = filters[key];
 
     apply({
@@ -108,20 +107,17 @@ export function CatalogFilter({
           id="catalog-filter-panel"
           className="absolute top-full left-0 z-40 mt-2 w-[min(22rem,calc(100vw-2.5rem))] rounded-3xl border border-line bg-surface p-6"
         >
-          <div className="flex items-center justify-between">
-            <p className="text-xs tracking-widest text-ink-muted uppercase">Подбор</p>
-            <button
-              type="button"
-              onClick={() => setIsOpen(false)}
-              aria-label="Закрыть фильтры"
-              className="-mr-2 p-2 text-ink-muted transition-colors hover:text-ink"
-            >
-              <CloseIcon className="size-4" />
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => setIsOpen(false)}
+            aria-label="Закрыть фильтры"
+            className="-mt-2 -mr-2 ml-auto block p-2 text-ink-muted transition-colors hover:text-ink"
+          >
+            <CloseIcon className="size-4" />
+          </button>
 
           {groups.map((group) => (
-            <fieldset key={group.param} className="mt-5">
+            <fieldset key={group.param} className="mt-3">
               <legend className="text-sm text-ink-muted">{group.title}</legend>
 
               <div className="mt-3 flex flex-wrap gap-2">
@@ -148,10 +144,12 @@ export function CatalogFilter({
             </fieldset>
           ))}
 
+          <PriceRange filters={filters} onApply={apply} />
+
           {selectedCount > 0 ? (
             <button
               type="button"
-              onClick={() => apply({ typeSlugs: [], styleSlugs: [] })}
+              onClick={() => apply(EMPTY_FILTERS)}
               className="mt-6 text-sm text-ink-muted underline underline-offset-4 transition-colors hover:text-ink"
             >
               Сбросить всё
@@ -161,4 +159,77 @@ export function CatalogFilter({
       ) : null}
     </div>
   );
+}
+
+/**
+ * Цена набирается вручную, поэтому применяется не на каждое нажатие клавиши,
+ * а когда человек закончил: по Enter или уходу из поля.
+ */
+function PriceRange({
+  filters,
+  onApply,
+}: {
+  filters: CatalogFilters;
+  onApply: (next: CatalogFilters) => void;
+}) {
+  const commit = (key: "priceMin" | "priceMax", raw: string) => {
+    const next = toPrice(raw);
+
+    if (next !== filters[key]) {
+      onApply({ ...filters, [key]: next });
+    }
+  };
+
+  return (
+    <fieldset className="mt-5">
+      <legend className="text-sm text-ink-muted">Цена, {siteConfig.currencyLabel}</legend>
+
+      <div className="mt-3 flex items-center gap-2">
+        <PriceInput label="Цена от" value={filters.priceMin} placeholder="от" onCommit={(raw) => commit("priceMin", raw)} />
+        <span aria-hidden className="text-ink-muted">
+          –
+        </span>
+        <PriceInput label="Цена до" value={filters.priceMax} placeholder="до" onCommit={(raw) => commit("priceMax", raw)} />
+      </div>
+    </fieldset>
+  );
+}
+
+function PriceInput({
+  label,
+  value,
+  placeholder,
+  onCommit,
+}: {
+  label: string;
+  value: number | null;
+  placeholder: string;
+  onCommit: (raw: string) => void;
+}) {
+  return (
+    <input
+      type="text"
+      inputMode="numeric"
+      aria-label={label}
+      placeholder={placeholder}
+      // key сбрасывает поле, когда фильтр поменяли снаружи: например кнопкой «Сбросить всё».
+      key={value ?? ""}
+      defaultValue={value ?? ""}
+      onBlur={(event) => onCommit(event.currentTarget.value)}
+      onKeyDown={(event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          onCommit(event.currentTarget.value);
+        }
+      }}
+      className="w-full min-w-0 rounded-full border border-line bg-transparent px-4 py-1.5 text-sm tabular-nums placeholder:text-ink-muted focus:border-ink focus:outline-none"
+    />
+  );
+}
+
+/** Пустое поле и мусор означают «без ограничения». */
+function toPrice(raw: string): number | null {
+  const digits = raw.replace(/\D/g, "");
+
+  return digits === "" ? null : Number(digits);
 }

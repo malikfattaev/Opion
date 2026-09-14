@@ -4,12 +4,13 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { CloseIcon, SlidersIcon } from "@/components/icons";
+import { appConfig } from "@/config/site";
 import type { CatalogOption } from "@/lib/catalog";
-import { buildQuery, countSelected, type CatalogFilters } from "@/lib/filters";
+import { buildQuery, countSelected, EMPTY_FILTERS, type CatalogFilters } from "@/lib/filters";
 import { haptic } from "@/lib/telegram/use-telegram";
 
-type Group = {
-  key: keyof CatalogFilters;
+type OptionGroup = {
+  key: "typeSlugs" | "styleSlugs";
   title: string;
   options: readonly CatalogOption[];
 };
@@ -32,7 +33,7 @@ export function FilterSheet({
 
   const selectedCount = countSelected(filters);
 
-  const groups: readonly Group[] = [
+  const groups: readonly OptionGroup[] = [
     { key: "typeSlugs", title: "Тип", options: types },
     { key: "styleSlugs", title: "Стиль", options: styles },
   ];
@@ -58,7 +59,7 @@ export function FilterSheet({
     router.replace(query ? `/?${query}` : "/", { scroll: false });
   };
 
-  const toggle = (key: keyof CatalogFilters, slug: string) => {
+  const toggle = (key: OptionGroup["key"], slug: string) => {
     const selected = filters[key];
 
     apply({
@@ -95,21 +96,18 @@ export function FilterSheet({
             className="flex-1 bg-black/60"
           />
 
-          <div className="rounded-t-3xl border-t border-line bg-surface px-5 pt-5 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
-            <div className="flex items-center justify-between">
-              <p className="text-xs tracking-widest text-ink-muted uppercase">Подбор</p>
-              <button
-                type="button"
-                onClick={() => setIsOpen(false)}
-                aria-label="Закрыть"
-                className="-mr-2 p-2 text-ink-muted"
-              >
-                <CloseIcon className="size-4" />
-              </button>
-            </div>
+          <div className="rounded-t-3xl border-t border-line bg-surface px-5 pt-4 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+            <button
+              type="button"
+              onClick={() => setIsOpen(false)}
+              aria-label="Закрыть"
+              className="-mr-2 ml-auto block p-2 text-ink-muted"
+            >
+              <CloseIcon className="size-4" />
+            </button>
 
             {groups.map((group) => (
-              <fieldset key={group.key} className="mt-5">
+              <fieldset key={group.key} className="mt-2">
                 <legend className="text-sm text-ink-muted">{group.title}</legend>
 
                 <div className="mt-3 flex flex-wrap gap-2">
@@ -136,11 +134,13 @@ export function FilterSheet({
               </fieldset>
             ))}
 
+            <PriceRange filters={filters} onApply={apply} />
+
             <div className="mt-6 flex gap-3">
               {selectedCount > 0 ? (
                 <button
                   type="button"
-                  onClick={() => apply({ typeSlugs: [], styleSlugs: [] })}
+                  onClick={() => apply(EMPTY_FILTERS)}
                   className="flex-1 rounded-full border border-line py-3 text-sm"
                 >
                   Сбросить
@@ -160,4 +160,77 @@ export function FilterSheet({
       ) : null}
     </>
   );
+}
+
+/**
+ * Цена набирается вручную, поэтому применяется не на каждое нажатие клавиши,
+ * а когда человек закончил: по Enter или уходу из поля.
+ */
+function PriceRange({
+  filters,
+  onApply,
+}: {
+  filters: CatalogFilters;
+  onApply: (next: CatalogFilters) => void;
+}) {
+  const commit = (key: "priceMin" | "priceMax", raw: string) => {
+    const next = toPrice(raw);
+
+    if (next !== filters[key]) {
+      onApply({ ...filters, [key]: next });
+    }
+  };
+
+  return (
+    <fieldset className="mt-5">
+      <legend className="text-sm text-ink-muted">Цена, {appConfig.currencyLabel}</legend>
+
+      <div className="mt-3 flex items-center gap-2">
+        <PriceInput label="Цена от" value={filters.priceMin} placeholder="от" onCommit={(raw) => commit("priceMin", raw)} />
+        <span aria-hidden className="text-ink-muted">
+          –
+        </span>
+        <PriceInput label="Цена до" value={filters.priceMax} placeholder="до" onCommit={(raw) => commit("priceMax", raw)} />
+      </div>
+    </fieldset>
+  );
+}
+
+function PriceInput({
+  label,
+  value,
+  placeholder,
+  onCommit,
+}: {
+  label: string;
+  value: number | null;
+  placeholder: string;
+  onCommit: (raw: string) => void;
+}) {
+  return (
+    <input
+      type="text"
+      inputMode="numeric"
+      aria-label={label}
+      placeholder={placeholder}
+      // key сбрасывает поле, когда фильтр поменяли снаружи: например кнопкой «Сбросить».
+      key={value ?? ""}
+      defaultValue={value ?? ""}
+      onBlur={(event) => onCommit(event.currentTarget.value)}
+      onKeyDown={(event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          event.currentTarget.blur();
+        }
+      }}
+      className="w-full min-w-0 rounded-full border border-line bg-transparent px-4 py-2 text-base tabular-nums placeholder:text-ink-muted focus:border-ink focus:outline-none"
+    />
+  );
+}
+
+/** Пустое поле и мусор означают «без ограничения». */
+function toPrice(raw: string): number | null {
+  const digits = raw.replace(/\D/g, "");
+
+  return digits === "" ? null : Number(digits);
 }

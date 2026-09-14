@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { apiUrl } from "@/lib/env";
+import type { CatalogFilters } from "@/lib/filters";
 
 /** Каталог живёт на сайте: мини-апп только читает его, своей копии не держит. */
 
@@ -59,11 +60,13 @@ export async function getProduct(slug: string): Promise<Product | null> {
 
 export function filterProducts(
   products: readonly Product[],
-  { typeSlugs = [], styleSlugs = [] }: { typeSlugs?: readonly string[]; styleSlugs?: readonly string[] },
+  { typeSlugs = [], styleSlugs = [], priceMin = null, priceMax = null }: Partial<CatalogFilters>,
 ): Product[] {
   return products.filter(
     (product) =>
       (typeSlugs.length === 0 || typeSlugs.includes(product.typeSlug)) &&
-      (styleSlugs.length === 0 || product.styleSlugs.some((slug) => styleSlugs.includes(slug))),
+      (styleSlugs.length === 0 || product.styleSlugs.some((slug) => styleSlugs.includes(slug))) &&
+      (priceMin === null || product.price >= priceMin) &&
+      (priceMax === null || product.price <= priceMax),
   );
 }

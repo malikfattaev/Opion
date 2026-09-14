@@ -2,6 +2,8 @@ import { z } from "zod";
 
 import { apiUrl } from "@/lib/env";
 
+import type { CatalogFilters } from "./filters";
+
 /** Каталог живёт в сервисе API. Сайт только читает его и своей копии не держит. */
 
 const optionSchema = z.object({ slug: z.string(), name: z.string() });
@@ -68,12 +70,16 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
 export async function getProducts({
   typeSlugs = [],
   styleSlugs = [],
-}: { typeSlugs?: readonly string[]; styleSlugs?: readonly string[] } = {}): Promise<Product[]> {
+  priceMin = null,
+  priceMax = null,
+}: Partial<CatalogFilters> = {}): Promise<Product[]> {
   const { products } = await getCatalog();
 
   return products.filter(
     (product) =>
       (typeSlugs.length === 0 || typeSlugs.includes(product.typeSlug)) &&
-      (styleSlugs.length === 0 || product.styleSlugs.some((slug) => styleSlugs.includes(slug))),
+      (styleSlugs.length === 0 || product.styleSlugs.some((slug) => styleSlugs.includes(slug))) &&
+      (priceMin === null || product.price >= priceMin) &&
+      (priceMax === null || product.price <= priceMax),
   );
 }
