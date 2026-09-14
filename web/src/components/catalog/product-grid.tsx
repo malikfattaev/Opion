@@ -3,7 +3,7 @@ import type { Product } from "@/lib/catalog";
 
 export function ProductGrid({ products }: { products: readonly Product[] }) {
   if (products.length === 0) {
-    return <p className="py-16 text-sm text-ink-muted">В этом разделе пока пусто.</p>;
+    return <p className="py-16 text-sm text-ink-muted">Ничего не нашлось — попробуйте изменить фильтры.</p>;
   }
 
   return (

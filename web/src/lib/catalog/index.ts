@@ -1,5 +1,5 @@
-import { placeholderCategories, placeholderProducts } from "./placeholder-data";
-import type { Category, Product } from "./types";
+import { placeholderProducts, placeholderStyles, placeholderTypes } from "./placeholder-data";
+import type { Product, ProductStyle, ProductType } from "./types";
 
 /**
  * Единственная дверь в каталог. Сейчас за ней временные данные, дальше —
@@ -7,20 +7,31 @@ import type { Category, Product } from "./types";
  * при переходе на базу вызывающий код менять не придётся.
  */
 
-export async function getCategories(): Promise<Category[]> {
-  return [...placeholderCategories];
+export type ProductQuery = {
+  /** Пустой список означает «не фильтровать», а не «ничего не показывать». */
+  typeSlugs?: readonly string[];
+  styleSlugs?: readonly string[];
+  limit?: number;
+};
+
+export async function getProductTypes(): Promise<ProductType[]> {
+  return [...placeholderTypes];
 }
 
-export async function getCategoryBySlug(slug: string): Promise<Category | null> {
-  return placeholderCategories.find((category) => category.slug === slug) ?? null;
+export async function getProductStyles(): Promise<ProductStyle[]> {
+  return [...placeholderStyles];
 }
 
-export async function getProducts(options: { categorySlug?: string; limit?: number } = {}): Promise<Product[]> {
-  const { categorySlug, limit } = options;
+export async function getProductTypeBySlug(slug: string): Promise<ProductType | null> {
+  return placeholderTypes.find((type) => type.slug === slug) ?? null;
+}
 
-  const products = categorySlug
-    ? placeholderProducts.filter((product) => product.categorySlug === categorySlug)
-    : [...placeholderProducts];
+export async function getProducts({ typeSlugs = [], styleSlugs = [], limit }: ProductQuery = {}): Promise<Product[]> {
+  const products = placeholderProducts.filter(
+    (product) =>
+      (typeSlugs.length === 0 || typeSlugs.includes(product.typeSlug)) &&
+      (styleSlugs.length === 0 || product.styleSlugs.some((slug) => styleSlugs.includes(slug))),
+  );
 
   return limit === undefined ? products : products.slice(0, limit);
 }
@@ -29,4 +40,4 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
   return placeholderProducts.find((product) => product.slug === slug) ?? null;
 }
 
-export type { Category, Product } from "./types";
+export type { Product, ProductStyle, ProductType } from "./types";

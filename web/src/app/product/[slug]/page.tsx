@@ -4,7 +4,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Container } from "@/components/layout/container";
-import { getCategoryBySlug, getProductBySlug, getProducts } from "@/lib/catalog";
+import { getProductBySlug, getProducts, getProductTypeBySlug } from "@/lib/catalog";
+import { TYPE_PARAM } from "@/lib/catalog/filters";
 import { formatPrice } from "@/lib/money";
 
 export async function generateStaticParams() {
@@ -28,7 +29,7 @@ export default async function ProductPage({ params }: PageProps<"/product/[slug]
     notFound();
   }
 
-  const category = await getCategoryBySlug(product.categorySlug);
+  const type = await getProductTypeBySlug(product.typeSlug);
   const hasDiscount =
     product.compareAtPriceMinor !== undefined && product.compareAtPriceMinor > product.priceMinor;
 
@@ -56,12 +57,12 @@ export default async function ProductPage({ params }: PageProps<"/product/[slug]
       </div>
 
       <div className="lg:sticky lg:top-24 lg:self-start">
-        {category ? (
+        {type ? (
           <Link
-            href={`/catalog/${category.slug}`}
+            href={`/?${TYPE_PARAM}=${type.slug}`}
             className="text-xs tracking-widest text-ink-muted uppercase transition-colors hover:text-ink"
           >
-            {category.name}
+            {type.name}
           </Link>
         ) : null}
 

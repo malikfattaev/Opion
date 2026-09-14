@@ -24,9 +24,7 @@ export type NavigationItem = {
  * достижим отсюда — иначе страница окажется без единой ссылки на себя.
  */
 export const mainNavigation: readonly NavigationItem[] = [
-  { href: "/", label: "Каталог", activePrefixes: ["/catalog"] },
-  { href: "/lookbook", label: "Лукбук" },
-  { href: "/about", label: "О бренде" },
+  { href: "/about", label: "О нас" },
   { href: "/delivery", label: "Доставка" },
   { href: "/contacts", label: "Контакты" },
 ];
