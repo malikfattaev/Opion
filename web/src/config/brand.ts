@@ -11,8 +11,8 @@
 export const brand = {
   logo: {
     src: "/brand/logo.png",
-    width: 479,
-    height: 192,
+    width: 1200,
+    height: 481,
     /** Высота логотипа в шапке, px. Ширина считается по пропорции. */
     headerHeight: 26,
   },

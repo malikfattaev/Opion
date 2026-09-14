@@ -20,9 +20,6 @@ export function CartContents() {
       <div className="flex flex-col items-center px-5 pt-24 text-center">
         <p className="font-display text-2xl">Корзина пуста</p>
         <p className="mt-2 text-sm text-ink-muted">Выберите что-нибудь в каталоге.</p>
-        <Link href="/" className="mt-6 rounded-full bg-accent px-8 py-3 text-sm text-accent-contrast">
-          В каталог
-        </Link>
       </div>
     );
   }
@@ -78,7 +75,7 @@ export function CartContents() {
         })}
       </ul>
 
-      <div className="sticky bottom-0 -mx-5 mt-auto border-t border-line bg-canvas/95 px-5 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur">
+      <div className="-mx-5 mt-auto border-t border-line px-5 pt-4">
         <p className="flex justify-between text-base">
           <span>Итого</span>
           <span className="tabular-nums">{formatPrice(total)}</span>

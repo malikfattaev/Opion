@@ -4,8 +4,8 @@ import Link from "next/link";
 import { useEffect, useState, type FormEvent } from "react";
 
 import { useCart } from "@/lib/cart/use-cart";
-import { apiUrl } from "@/lib/env";
 import { formatPrice } from "@/lib/money";
+import { submitOrder, type PublicOrder } from "@/lib/orders/api";
 import type { PaymentDetails } from "@/lib/payment";
 import { haptic, hapticSuccess, useTelegram } from "@/lib/telegram/use-telegram";
 
@@ -17,7 +17,7 @@ export function CheckoutForm({ payment }: { payment: PaymentDetails | null }) {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [completed, setCompleted] = useState<{ number: string | null } | null>(null);
+  const [completed, setCompleted] = useState<PublicOrder | null>(null);
   const [screenshotName, setScreenshotName] = useState<string | null>(null);
   const [isCopied, setIsCopied] = useState(false);
 
@@ -49,24 +49,19 @@ export function CheckoutForm({ payment }: { payment: PaymentDetails | null }) {
     setError(null);
     setIsSubmitting(true);
 
-    try {
-      const response = await fetch(`${apiUrl}/orders`, { method: "POST", body: formData });
-      const payload: unknown = await response.json().catch(() => null);
+    const result = await submitOrder(formData);
 
-      if (!response.ok) {
-        setError(readMessage(payload) ?? "Не получилось отправить заказ. Попробуйте ещё раз.");
+    setIsSubmitting(false);
 
-        return;
-      }
+    if (!result.ok) {
+      setError(result.message);
 
-      hapticSuccess();
-      setCompleted({ number: readOrderNumber(payload) });
-      clear();
-    } catch {
-      setError("Нет связи. Проверьте интернет и попробуйте ещё раз.");
-    } finally {
-      setIsSubmitting(false);
+      return;
     }
+
+    hapticSuccess();
+    setCompleted(result.order);
+    clear();
   };
 
   if (completed) {
@@ -74,15 +69,13 @@ export function CheckoutForm({ payment }: { payment: PaymentDetails | null }) {
       <div className="flex flex-col items-center px-5 pt-24 text-center">
         <p className="font-display text-3xl">Заказ отправлен</p>
         <p className="mt-3 max-w-xs text-sm text-ink-muted">
-          {completed.number ? (
-            <>
-              Номер заказа <span className="text-ink">{completed.number}</span>.{" "}
-            </>
-          ) : null}
-          Проверим перевод и напишем вам, чтобы подтвердить доставку.
+          Номер заказа <span className="text-ink">{completed.number}</span>. Проверим перевод и подтвердим его.
         </p>
-        <Link href="/" className="mt-6 rounded-full bg-accent px-8 py-3 text-sm text-accent-contrast">
-          В каталог
+        <p className="mt-1 text-sm text-ink-muted">
+          Статус: <span className="text-ink">{completed.statusLabel}</span>
+        </p>
+        <Link href="/orders" className="mt-6 rounded-full bg-accent px-8 py-3 text-sm text-accent-contrast">
+          Мои заказы
         </Link>
       </div>
     );
@@ -96,9 +89,7 @@ export function CheckoutForm({ payment }: { payment: PaymentDetails | null }) {
     return (
       <div className="flex flex-col items-center px-5 pt-24 text-center">
         <p className="font-display text-2xl">Корзина пуста</p>
-        <Link href="/" className="mt-6 rounded-full bg-accent px-8 py-3 text-sm text-accent-contrast">
-          В каталог
-        </Link>
+        <p className="mt-2 text-sm text-ink-muted">Выберите что-нибудь в каталоге.</p>
       </div>
     );
   }
@@ -204,7 +195,7 @@ export function CheckoutForm({ payment }: { payment: PaymentDetails | null }) {
         className="sr-only"
       />
 
-      <div className="sticky bottom-0 -mx-5 mt-8 border-t border-line bg-canvas/95 px-5 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur">
+      <div className="-mx-5 mt-8 border-t border-line px-5 pt-4">
         {error ? <p className="mb-3 text-sm text-ink">{error}</p> : null}
 
         <button
@@ -248,26 +239,4 @@ function Field({
       )}
     </div>
   );
-}
-
-function readMessage(payload: unknown): string | null {
-  if (typeof payload !== "object" || payload === null) {
-    return null;
-  }
-
-  const message = (payload as Record<string, unknown>).message;
-
-  return typeof message === "string" ? message : null;
-}
-
-function readOrderNumber(payload: unknown): string | null {
-  if (typeof payload === "object" && payload !== null) {
-    const value = (payload as Record<string, unknown>).orderNumber;
-
-    if (typeof value === "string") {
-      return value;
-    }
-  }
-
-  return null;
 }

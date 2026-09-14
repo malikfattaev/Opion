@@ -1,6 +1,7 @@
 import "server-only";
 
 import { allowedOrigins } from "@/lib/env";
+import { INIT_DATA_HEADER } from "@/lib/telegram/headers";
 
 /**
  * Витрины живут на своих доменах, поэтому браузер обязан получить разрешение.
@@ -17,7 +18,7 @@ export function corsHeaders(request: Request): Record<string, string> {
   return {
     "Access-Control-Allow-Origin": origin,
     "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Headers": `Content-Type,${INIT_DATA_HEADER}`,
     "Access-Control-Max-Age": "86400",
     Vary: "Origin",
   };

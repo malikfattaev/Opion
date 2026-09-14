@@ -29,9 +29,9 @@ export function AddToCart({ product }: { product: Product }) {
   };
 
   return (
-    /* Панель прижата к низу экрана: до неё дотягивается палец, и она не уезжает
-       вместе с описанием при прокрутке. */
-    <div className="sticky bottom-0 -mx-5 mt-8 border-t border-line bg-canvas/95 px-5 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur">
+    /* Панель стоит в конце страницы, а не липнет к низу: снизу уже плавает док,
+       и две накладки друг на друге выглядели бы месивом. */
+    <div className="-mx-5 mt-8 border-t border-line px-5 pt-4">
       <fieldset>
         <legend className="sr-only">Размер</legend>
 

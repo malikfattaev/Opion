@@ -5,18 +5,20 @@ import { useEffect, useState, type FormEvent } from "react";
 
 import { Container } from "@/components/layout/container";
 import { useCart } from "@/lib/cart/use-cart";
-import { apiUrl } from "@/lib/env";
-import type { PaymentDetails } from "@/lib/payment";
 import { formatPrice } from "@/lib/money";
+import { submitOrder, type PublicOrder } from "@/lib/orders/api";
+import { useOrderTokens } from "@/lib/orders/use-order-tokens";
+import type { PaymentDetails } from "@/lib/payment";
 
 const COPY_FEEDBACK_MS = 2000;
 
 export function CheckoutForm({ payment }: { payment: PaymentDetails | null }) {
   const { lines, isReady, total, clear } = useCart();
+  const { rememberToken } = useOrderTokens();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [completedOrder, setCompletedOrder] = useState<{ number: string | null } | null>(null);
+  const [completedOrder, setCompletedOrder] = useState<PublicOrder | null>(null);
   const [screenshotName, setScreenshotName] = useState<string | null>(null);
   const [isCopied, setIsCopied] = useState(false);
 
@@ -44,24 +46,21 @@ export function CheckoutForm({ payment }: { payment: PaymentDetails | null }) {
     setError(null);
     setIsSubmitting(true);
 
-    try {
-      const response = await fetch(`${apiUrl}/orders`, { method: "POST", body: formData });
-      const payload: unknown = await response.json().catch(() => null);
+    const result = await submitOrder(formData);
 
-      if (!response.ok) {
-        setError(readMessage(payload) ?? "Не получилось отправить заказ. Попробуйте ещё раз.");
+    setIsSubmitting(false);
 
-        return;
-      }
+    if (!result.ok) {
+      setError(result.message);
 
-      // Признак успеха ставим первым: очистка корзины опустошит экран оформления.
-      setCompletedOrder({ number: readOrderNumber(payload) });
-      clear();
-    } catch {
-      setError("Нет связи с сервером. Проверьте интернет и попробуйте ещё раз.");
-    } finally {
-      setIsSubmitting(false);
+      return;
     }
+
+    // Токен - единственный пропуск покупателя к своему заказу, сохраняем первым.
+    rememberToken(result.order.token);
+    // Признак успеха ставим раньше очистки: она опустошит экран оформления.
+    setCompletedOrder(result.order);
+    clear();
   };
 
   if (completedOrder) {
@@ -69,18 +68,14 @@ export function CheckoutForm({ payment }: { payment: PaymentDetails | null }) {
       <Container className="pt-16 pb-24">
         <h1 className="font-display text-4xl leading-tight sm:text-5xl">Заказ отправлен</h1>
         <p className="mt-4 max-w-md text-sm text-ink-muted">
-          {completedOrder.number ? (
-            <>
-              Номер заказа <span className="text-ink">{completedOrder.number}</span>.{" "}
-            </>
-          ) : null}
-          Мы проверим перевод и напишем вам, чтобы подтвердить доставку.
+          Номер заказа <span className="text-ink">{completedOrder.number}</span>. Мы проверим перевод и
+          подтвердим его. Статус: <span className="text-ink">{completedOrder.statusLabel}</span>.
         </p>
         <Link
-          href="/"
+          href="/orders"
           className="mt-8 inline-block rounded-full bg-accent px-8 py-3 text-sm text-accent-contrast transition-opacity hover:opacity-90"
         >
-          Вернуться в каталог
+          Мои заказы
         </Link>
       </Container>
     );
@@ -95,13 +90,7 @@ export function CheckoutForm({ payment }: { payment: PaymentDetails | null }) {
     return (
       <Container className="pt-16 pb-24">
         <h1 className="font-display text-4xl leading-tight sm:text-5xl">Оформление</h1>
-        <p className="mt-4 text-sm text-ink-muted">Корзина пуста. Сначала выберите вещи.</p>
-        <Link
-          href="/"
-          className="mt-8 inline-block rounded-full bg-accent px-8 py-3 text-sm text-accent-contrast transition-opacity hover:opacity-90"
-        >
-          В каталог
-        </Link>
+        <p className="mt-4 text-sm text-ink-muted">Корзина пуста. Сначала выберите вещи в каталоге.</p>
       </Container>
     );
   }
@@ -120,7 +109,7 @@ export function CheckoutForm({ payment }: { payment: PaymentDetails | null }) {
             type="tel"
             inputMode="tel"
             autoComplete="tel"
-            placeholder="+7 900 000-00-00"
+            placeholder="+998 90 000-00-00"
             required
             className="sm:col-span-2"
           />
@@ -266,26 +255,4 @@ function Field({
       )}
     </div>
   );
-}
-
-function readMessage(payload: unknown): string | null {
-  if (typeof payload !== "object" || payload === null) {
-    return null;
-  }
-
-  const message = (payload as Record<string, unknown>).message;
-
-  return typeof message === "string" ? message : null;
-}
-
-function readOrderNumber(payload: unknown): string | null {
-  if (typeof payload === "object" && payload !== null) {
-    const value = (payload as Record<string, unknown>).orderNumber;
-
-    if (typeof value === "string") {
-      return value;
-    }
-  }
-
-  return null;
 }

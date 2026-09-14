@@ -25,11 +25,11 @@ export function CartIcon({ className = "size-5" }: IconProps) {
   );
 }
 
-export function UserIcon({ className = "size-5" }: IconProps) {
+export function ReceiptIcon({ className = "size-5" }: IconProps) {
   return (
     <svg {...baseProps} className={className}>
-      <circle cx="12" cy="8.5" r="3.5" />
-      <path d="M5 20a7 7 0 0 1 14 0" />
+      <path d="M6 3.5h12v17l-2.4-1.5-2.4 1.5-2.4-1.5-2.4 1.5-2.4-1.5V3.5Z" />
+      <path d="M9.5 8.5h5M9.5 12.5h5" />
     </svg>
   );
 }

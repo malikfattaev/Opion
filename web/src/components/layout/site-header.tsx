@@ -5,12 +5,13 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 import { Logo } from "@/components/brand/logo";
-import { CartIcon, CloseIcon, MenuIcon } from "@/components/icons";
+import { CartIcon, CloseIcon, MenuIcon, ReceiptIcon } from "@/components/icons";
 import { Container } from "@/components/layout/container";
 import { mainNavigation, type NavigationItem } from "@/config/site";
 import { useCart } from "@/lib/cart/use-cart";
 
 const CART_ITEM: NavigationItem = { href: "/cart", label: "Корзина" };
+const ORDERS_ITEM: NavigationItem = { href: "/orders", label: "Мои заказы" };
 
 export function SiteHeader() {
   const pathname = usePathname();
@@ -44,6 +45,10 @@ export function SiteHeader() {
           </nav>
 
           <div className="col-start-3 flex items-center gap-1 justify-self-end">
+            <IconLink item={ORDERS_ITEM} isActive={isActiveItem(pathname, ORDERS_ITEM)} onClick={closeMenu}>
+              <ReceiptIcon />
+            </IconLink>
+
             <IconLink item={CART_ITEM} isActive={isActiveItem(pathname, CART_ITEM)} onClick={closeMenu}>
               <CartIcon />
               {/* Счётчик появляется только после чтения localStorage, иначе

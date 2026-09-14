@@ -1,14 +1,17 @@
+import { OrderSource } from "@/generated/prisma/enums";
 import { getProductBySlug } from "@/lib/catalog";
 import { jsonResponse, preflight } from "@/lib/cors";
-import { buildOrderCaption, createOrderNumber, type ResolvedOrderLine } from "@/lib/orders/message";
+import type { ResolvedOrderLine } from "@/lib/orders/message";
+import { toPublicOrder } from "@/lib/orders/public";
+import { attachTelegramMessage, createOrder } from "@/lib/orders/repository";
 import {
   ACCEPTED_SCREENSHOT_TYPES,
   MAX_SCREENSHOT_BYTES,
   orderRequestSchema,
   type OrderItemInput,
 } from "@/lib/orders/schema";
-import { sendOrderPhoto } from "@/lib/telegram";
 import { verifyInitData } from "@/lib/telegram/init-data";
+import { sendOrderMessage } from "@/lib/telegram/orders";
 
 /** Заказ уходит в Telegram в момент запроса, кешировать здесь нечего. */
 export const dynamic = "force-dynamic";
@@ -64,6 +67,7 @@ export async function POST(request: Request) {
     }
 
     lines.push({
+      productSlug: product.slug,
       name: product.name,
       size: item.size,
       quantity: item.quantity,
@@ -71,17 +75,20 @@ export async function POST(request: Request) {
     });
   }
 
-  const total = lines.reduce((sum, line) => sum + line.unitPrice * line.quantity, 0);
-  const orderNumber = createOrderNumber();
-
   // Из мини-аппа приходит подписанный initData: если подпись сходится,
-  // в заказ попадёт настоящий аккаунт покупателя, а не только введённое имя.
+  // к заказу привяжется настоящий аккаунт покупателя и он увидит статус.
   const telegramUser = verifyInitData(readText(formData.get("initData")) ?? "");
 
-  const sent = await sendOrderPhoto({
-    photo: screenshot,
-    caption: buildOrderCaption({ orderNumber, order: parsed.data, lines, total, telegramUser }),
+  const order = await createOrder({
+    source: telegramUser ? OrderSource.MINI_APP : OrderSource.WEBSITE,
+    order: parsed.data,
+    lines,
+    total: lines.reduce((sum, line) => sum + line.unitPrice * line.quantity, 0),
+    telegramUserId: telegramUser ? String(telegramUser.id) : null,
+    telegramUsername: telegramUser?.username ?? null,
   });
+
+  const sent = await sendOrderMessage(order, screenshot);
 
   if (!sent.ok) {
     console.error("Заказ не доставлен в Telegram:", sent.reason);
@@ -89,7 +96,13 @@ export async function POST(request: Request) {
     return fail(request, "Не получилось отправить заказ. Напишите нам в Telegram, оформим вручную.", 502);
   }
 
-  return jsonResponse(request, { orderNumber, total });
+  await attachTelegramMessage(order.id, sent.result);
+
+  return jsonResponse(request, { order: toPublicOrder(order) });
+}
+
+export function OPTIONS(request: Request) {
+  return preflight(request);
 }
 
 function readOptional(value: FormDataEntryValue | null): string | undefined {
@@ -113,10 +126,6 @@ function readItems(value: FormDataEntryValue | null): OrderItemInput[] | undefin
   } catch {
     return undefined;
   }
-}
-
-export function OPTIONS(request: Request) {
-  return preflight(request);
 }
 
 function fail(request: Request, message: string, status: number) {

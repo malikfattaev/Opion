@@ -1,63 +1,61 @@
+import { OrderSource } from "@/generated/prisma/enums";
 import { formatPrice } from "@/lib/money";
-import type { TelegramUser } from "@/lib/telegram/init-data";
 
-import type { OrderRequest } from "./schema";
+import { orderNumber, type StoredOrder } from "./repository";
+import { isAwaitingDecision, statusLabel } from "./status";
 
 export type ResolvedOrderLine = {
+  productSlug: string;
   name: string;
   size: string;
   quantity: number;
   unitPrice: number;
 };
 
-/** Короткий номер, который называют покупателю и ищут в переписке. */
-export function createOrderNumber(now: Date = new Date()): string {
-  return `OP-${now.getTime().toString(36).toUpperCase()}`;
-}
+const SOURCE_LABELS: Record<OrderSource, string> = {
+  [OrderSource.WEBSITE]: "сайт",
+  [OrderSource.MINI_APP]: "мини-апп",
+  [OrderSource.MANUAL]: "вручную",
+};
 
 /**
- * Подпись к скриншоту оплаты. Размечена HTML, тем же parse_mode, что и в отправке.
+ * Подпись к скриншоту оплаты. Размечена HTML, тем же parse_mode, что и отправка.
  * Любые данные покупателя экранируются: иначе символ «<» в адресе развалит разметку.
  */
-export function buildOrderCaption({
-  orderNumber,
-  order,
-  lines,
-  total,
-  telegramUser = null,
-}: {
-  orderNumber: string;
-  order: OrderRequest;
-  lines: readonly ResolvedOrderLine[];
-  total: number;
-  telegramUser?: TelegramUser | null;
-}): string {
-  const items = lines
-    .map((line) => `• ${escapeHtml(line.name)}, ${escapeHtml(line.size)} × ${line.quantity} · ${formatPrice(line.unitPrice * line.quantity)}`)
-    .join("\n");
+export function buildOrderCaption(order: StoredOrder): string {
+  const heading = isAwaitingDecision(order.status) ? "Новый заказ" : "Заказ";
 
   const rows = [
-    `<b>Новый заказ ${escapeHtml(orderNumber)}</b>`,
+    `<b>${heading} ${escapeHtml(orderNumber(order))}</b>`,
+    `<b>Статус:</b> ${escapeHtml(statusLabel(order.status))}${formatDecision(order)}`,
     "",
     `<b>Покупатель:</b> ${escapeHtml(`${order.firstName} ${order.lastName}`)}`,
     `<b>Телефон:</b> ${escapeHtml(order.phone)}`,
-    ...(telegramUser ? [`<b>Telegram:</b> ${formatTelegramUser(telegramUser)}`] : []),
+    ...(order.telegramUsername ? [`<b>Telegram:</b> @${escapeHtml(order.telegramUsername)}`] : []),
     `<b>Адрес:</b> ${escapeHtml(order.address)}`,
+    `<b>Откуда:</b> ${escapeHtml(SOURCE_LABELS[order.source])}`,
   ];
 
   if (order.comment) {
     rows.push(`<b>Комментарий:</b> ${escapeHtml(order.comment)}`);
   }
 
-  rows.push("", items, "", `<b>Итого: ${formatPrice(total)}</b>`);
+  rows.push("", formatItems(order), "", `<b>Итого: ${formatPrice(order.total)}</b>`);
 
   return rows.join("\n");
 }
 
-function formatTelegramUser(user: TelegramUser): string {
-  const name = escapeHtml([user.first_name, user.last_name].filter(Boolean).join(" "));
+function formatItems(order: StoredOrder): string {
+  return order.items
+    .map(
+      (line) =>
+        `• ${escapeHtml(line.name)}, ${escapeHtml(line.size)} × ${line.quantity} · ${formatPrice(line.unitPrice * line.quantity)}`,
+    )
+    .join("\n");
+}
 
-  return user.username ? `${name} (@${escapeHtml(user.username)})` : `${name} (id ${user.id})`;
+function formatDecision(order: StoredOrder): string {
+  return order.decidedByName ? ` · ${escapeHtml(order.decidedByName)}` : "";
 }
 
 function escapeHtml(value: string): string {

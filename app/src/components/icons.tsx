@@ -37,3 +37,27 @@ export function SlidersIcon({ className = "size-5" }: IconProps) {
     </svg>
   );
 }
+
+export function MenuIcon({ className = "size-5" }: IconProps) {
+  return (
+    <svg {...baseProps} className={className}>
+      <path d="M4 7h16M4 12h16M4 17h16" />
+    </svg>
+  );
+}
+
+export function ChevronLeftIcon({ className = "size-5" }: IconProps) {
+  return (
+    <svg {...baseProps} className={className}>
+      <path d="M14 6l-6 6 6 6" />
+    </svg>
+  );
+}
+
+export function ChevronRightIcon({ className = "size-5" }: IconProps) {
+  return (
+    <svg {...baseProps} className={className}>
+      <path d="M10 6l6 6-6 6" />
+    </svg>
+  );
+}

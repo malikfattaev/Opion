@@ -20,13 +20,7 @@ export function CartContents() {
     return (
       <Container className="pt-16 pb-24">
         <h1 className="font-display text-4xl leading-tight sm:text-5xl">Корзина</h1>
-        <p className="mt-4 text-sm text-ink-muted">Пока пусто.</p>
-        <Link
-          href="/"
-          className="mt-8 inline-block rounded-full bg-accent px-8 py-3 text-sm text-accent-contrast transition-opacity hover:opacity-90"
-        >
-          В каталог
-        </Link>
+        <p className="mt-4 text-sm text-ink-muted">Пока пусто. Выберите что-нибудь в каталоге.</p>
       </Container>
     );
   }

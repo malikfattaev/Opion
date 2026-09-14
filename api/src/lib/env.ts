@@ -23,6 +23,8 @@ const serverEnvSchema = z.object({
   TELEGRAM_ORDERS_CHAT_ID: z.string().min(1).optional(),
   /** Топик форума, если группа заказов разбита на темы. */
   TELEGRAM_ORDERS_THREAD_ID: z.coerce.number().int().positive().optional(),
+  /** Секрет, которым Telegram подписывает вызовы вебхука. Задаётся в setWebhook. */
+  TELEGRAM_WEBHOOK_SECRET: z.string().min(16).optional(),
 
   /** Реквизиты для перевода, которые видит покупатель. */
   PAYMENT_CARD_NUMBER: z.string().min(1).optional(),

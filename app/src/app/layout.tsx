@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Playfair_Display } from "next/font/google";
 import Script from "next/script";
 
+import { AppDock } from "@/components/app-dock";
 import { AppHeader } from "@/components/app-header";
 import { appConfig } from "@/config/site";
 import { TelegramBootstrap } from "@/lib/telegram/telegram-bootstrap";
@@ -49,7 +50,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="flex min-h-full flex-col">
         <TelegramBootstrap />
         <AppHeader />
-        <main className="flex-1 pb-[max(1.5rem,env(safe-area-inset-bottom))]">{children}</main>
+        {/* Отступ снизу равен высоте плавающего дока плюс безопасная зона. */}
+        <main className="flex-1 pb-[calc(5.5rem+env(safe-area-inset-bottom))]">{children}</main>
+        <AppDock />
       </body>
     </html>
   );
