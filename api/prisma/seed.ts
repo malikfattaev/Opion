@@ -42,17 +42,13 @@ async function seedCatalog(): Promise<void> {
   }
 
   for (const [position, product] of placeholderProducts.entries()) {
-    const existing = await db.product.findUnique({ where: { slug: product.slug }, select: { id: true } });
-
-    if (existing) {
-      continue;
-    }
-
     const type = await db.productType.findUniqueOrThrow({ where: { slug: product.typeSlug } });
     const styles = await db.style.findMany({ where: { slug: { in: [...product.styleSlugs] } }, select: { id: true } });
 
-    await db.product.create({
-      data: {
+    await db.product.upsert({
+      where: { slug: product.slug },
+      update: {},
+      create: {
         slug: product.slug,
         name: product.name,
         description: product.description,
@@ -84,14 +80,12 @@ async function seedOwner(): Promise<void> {
     return;
   }
 
-  const existing = await db.teamMember.findUnique({ where: { username }, select: { id: true } });
-
-  if (existing) {
-    return;
-  }
-
-  await db.teamMember.create({
-    data: {
+  // upsert, а не «проверить и создать»: сид может запуститься дважды подряд,
+  // и второй заход не должен падать на уникальном логине.
+  await db.teamMember.upsert({
+    where: { username },
+    update: {},
+    create: {
       username,
       name: process.env.ADMIN_NAME ?? username,
       passwordHash: await hashPassword(password),
@@ -99,7 +93,7 @@ async function seedOwner(): Promise<void> {
     },
   });
 
-  console.info(`Создан владелец ${username}.`);
+  console.info(`Владелец ${username} на месте.`);
 }
 
 async function main(): Promise<void> {
