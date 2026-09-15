@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+/** Палитра та же, что на витрине: кремовый #F8F1E7 на чёрном #000000. */
+@theme {
+  --color-canvas: #000000;
+  --color-surface: #171513;
+  --color-ink: #f8f1e7;
+  --color-ink-muted: #9a958f;
+  --color-line: #232220;
+  --color-accent: #f8f1e7;
+  --color-accent-contrast: #000000;
+  --color-danger: #e5715f;
+
+  --font-sans: var(--font-sans-body), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-display), ui-serif, Georgia, serif;
+}
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+}
