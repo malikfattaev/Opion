@@ -1,0 +1,192 @@
+import "server-only";
+
+import { db } from "@/lib/db";
+
+import type { ProductCreate, ProductUpdate } from "./schema";
+
+/** Вещь глазами админки: со связями, снятыми с витрины и служебными полями. */
+export type AdminProduct = {
+  id: string;
+  slug: string;
+  name: string;
+  description: string;
+  price: number;
+  comparePrice: number | null;
+  sizes: string[];
+  typeSlug: string;
+  styleSlugs: string[];
+  images: { url: string; alt: string }[];
+  isPublished: boolean;
+  position: number;
+  createdAt: string;
+};
+
+const SELECTION = {
+  id: true,
+  slug: true,
+  name: true,
+  description: true,
+  price: true,
+  comparePrice: true,
+  sizes: true,
+  isPublished: true,
+  position: true,
+  createdAt: true,
+  type: { select: { slug: true } },
+  styles: { select: { style: { select: { slug: true } } } },
+  images: { select: { url: true, alt: true }, orderBy: { position: "asc" } },
+} as const;
+
+/** Раздел не найден: вызывающий код превращает это в понятную ошибку формы. */
+export class UnknownReferenceError extends Error {}
+
+export async function listProducts(): Promise<AdminProduct[]> {
+  const rows = await db.product.findMany({
+    orderBy: [{ position: "asc" }, { createdAt: "desc" }],
+    select: SELECTION,
+  });
+
+  return rows.map(toAdminProduct);
+}
+
+export async function findProduct(id: string): Promise<AdminProduct | null> {
+  const row = await db.product.findUnique({ where: { id }, select: SELECTION });
+
+  return row ? toAdminProduct(row) : null;
+}
+
+export async function createProduct(input: ProductCreate): Promise<AdminProduct> {
+  const typeId = await resolveTypeId(input.typeSlug);
+  const styleIds = await resolveStyleIds(input.styleSlugs);
+
+  const row = await db.product.create({
+    data: {
+      slug: input.slug,
+      name: input.name,
+      description: input.description,
+      price: input.price,
+      comparePrice: input.comparePrice ?? null,
+      sizes: input.sizes,
+      isPublished: input.isPublished,
+      position: input.position ?? (await nextPosition()),
+      typeId,
+      styles: { create: styleIds.map((styleId) => ({ styleId })) },
+      images: { create: input.images.map((image, index) => ({ ...image, position: index })) },
+    },
+    select: SELECTION,
+  });
+
+  return toAdminProduct(row);
+}
+
+export async function updateProduct(id: string, input: ProductUpdate): Promise<AdminProduct | null> {
+  const existing = await db.product.findUnique({ where: { id }, select: { id: true } });
+
+  if (!existing) {
+    return null;
+  }
+
+  const typeId = input.typeSlug === undefined ? undefined : await resolveTypeId(input.typeSlug);
+  const styleIds = input.styleSlugs === undefined ? undefined : await resolveStyleIds(input.styleSlugs);
+
+  // Стили и фото заменяются целиком: форма всегда присылает итоговый список,
+  // и так не остаётся записей, про которые никто не помнит.
+  const row = await db.product.update({
+    where: { id },
+    data: {
+      ...(input.slug === undefined ? {} : { slug: input.slug }),
+      ...(input.name === undefined ? {} : { name: input.name }),
+      ...(input.description === undefined ? {} : { description: input.description }),
+      ...(input.price === undefined ? {} : { price: input.price }),
+      ...(input.comparePrice === undefined ? {} : { comparePrice: input.comparePrice ?? null }),
+      ...(input.sizes === undefined ? {} : { sizes: input.sizes }),
+      ...(input.isPublished === undefined ? {} : { isPublished: input.isPublished }),
+      ...(input.position === undefined ? {} : { position: input.position }),
+      ...(typeId === undefined ? {} : { typeId }),
+      ...(styleIds === undefined
+        ? {}
+        : { styles: { deleteMany: {}, create: styleIds.map((styleId) => ({ styleId })) } }),
+      ...(input.images === undefined
+        ? {}
+        : {
+            images: {
+              deleteMany: {},
+              create: input.images.map((image, index) => ({ ...image, position: index })),
+            },
+          }),
+    },
+    select: SELECTION,
+  });
+
+  return toAdminProduct(row);
+}
+
+export async function deleteProduct(id: string): Promise<boolean> {
+  const { count } = await db.product.deleteMany({ where: { id } });
+
+  return count > 0;
+}
+
+async function resolveTypeId(slug: string): Promise<string> {
+  const type = await db.productType.findUnique({ where: { slug }, select: { id: true } });
+
+  if (!type) {
+    throw new UnknownReferenceError("Такого типа нет.");
+  }
+
+  return type.id;
+}
+
+async function resolveStyleIds(slugs: readonly string[]): Promise<string[]> {
+  if (slugs.length === 0) {
+    return [];
+  }
+
+  const styles = await db.style.findMany({ where: { slug: { in: [...slugs] } }, select: { id: true } });
+
+  if (styles.length !== new Set(slugs).size) {
+    throw new UnknownReferenceError("Какого-то из выбранных стилей нет.");
+  }
+
+  return styles.map(({ id }) => id);
+}
+
+async function nextPosition(): Promise<number> {
+  const last = await db.product.findFirst({ orderBy: { position: "desc" }, select: { position: true } });
+
+  return last === null ? 0 : last.position + 1;
+}
+
+type ProductRow = {
+  id: string;
+  slug: string;
+  name: string;
+  description: string;
+  price: number;
+  comparePrice: number | null;
+  sizes: string[];
+  isPublished: boolean;
+  position: number;
+  createdAt: Date;
+  type: { slug: string };
+  styles: { style: { slug: string } }[];
+  images: { url: string; alt: string }[];
+};
+
+function toAdminProduct(row: ProductRow): AdminProduct {
+  return {
+    id: row.id,
+    slug: row.slug,
+    name: row.name,
+    description: row.description,
+    price: row.price,
+    comparePrice: row.comparePrice,
+    sizes: row.sizes,
+    typeSlug: row.type.slug,
+    styleSlugs: row.styles.map(({ style }) => style.slug),
+    images: row.images,
+    isPublished: row.isPublished,
+    position: row.position,
+    createdAt: row.createdAt.toISOString(),
+  };
+}

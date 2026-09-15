@@ -89,3 +89,122 @@ model OrderItem {
 
   @@index([orderId])
 }
+
+/// Тип вещи: худи, джинсы, футболка. У товара ровно один.
+model ProductType {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  name      String
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  products Product[]
+
+  @@index([position])
+}
+
+/// Стиль: Y2K, Индислиз, Лузер-кор, Archive. У товара их может быть несколько.
+model Style {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  name      String
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  products ProductStyle[]
+
+  @@index([position])
+}
+
+model Product {
+  id          String @id @default(cuid())
+  slug        String @unique
+  name        String
+  description String @default("")
+
+  /// Цена в сумах, целым числом: тийины не в обороте.
+  price Int
+  /// Старая цена для зачёркивания, если вещь со скидкой.
+  comparePrice Int?
+
+  /// Размеры в том порядке, в каком их показываем: S, M, L или 44, 46, 48.
+  sizes String[]
+
+  /// Снятую с витрины вещь не видно покупателям, но она остаётся в заказах.
+  isPublished Boolean @default(true)
+  position    Int     @default(0)
+
+  typeId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  type   ProductType    @relation(fields: [typeId], references: [id], onDelete: Restrict)
+  styles ProductStyle[]
+  images ProductImage[]
+
+  @@index([typeId])
+  @@index([isPublished, position])
+}
+
+/// Связка вещи со стилями: многие ко многим.
+model ProductStyle {
+  productId String
+  styleId   String
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  style   Style   @relation(fields: [styleId], references: [id], onDelete: Cascade)
+
+  @@id([productId, styleId])
+  @@index([styleId])
+}
+
+model ProductImage {
+  id        String   @id @default(cuid())
+  productId String
+  url       String
+  alt       String   @default("")
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId, position])
+}
+
+enum TeamRole {
+  /// Заводит и удаляет других участников команды.
+  OWNER
+  /// Ведёт каталог и заказы.
+  MANAGER
+}
+
+/// Раздел «Команда»: у кого есть доступ в админку.
+model TeamMember {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  passwordHash String
+  name         String
+  role         TeamRole @default(MANAGER)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  sessions Session[]
+}
+
+model Session {
+  id String @id @default(cuid())
+
+  /// Храним хеш токена: утечка таблицы не должна давать вход.
+  tokenHash String   @unique
+  memberId  String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  member TeamMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([memberId])
+  @@index([expiresAt])
+}
