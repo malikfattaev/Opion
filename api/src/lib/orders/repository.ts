@@ -72,9 +72,12 @@ const ORDER_WITH_MESSAGE_SELECTION = {
   telegramMessageId: true,
 } as const;
 
-/** Номер, который называют покупателю: «заказ OP-000148». */
+/**
+ * Номер заказа: «ORDER-148». Слово целиком, чтобы номер заказа не путали
+ * с артикулом вещи, который выглядит похоже.
+ */
 export function orderNumber(order: { seq: number }): string {
-  return `OP-${String(order.seq).padStart(6, "0")}`;
+  return `ORDER-${String(order.seq).padStart(3, "0")}`;
 }
 
 export type NewOrderInput = {
