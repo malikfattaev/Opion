@@ -17,6 +17,8 @@ export type ProductStyle = {
 
 export type Product = {
   slug: string;
+  /** Артикул: по нему вещь узнают в заказе и на складе. */
+  sku: string;
   name: string;
   description: string;
   typeSlug: string;

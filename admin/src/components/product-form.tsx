@@ -29,15 +29,27 @@ export function ProductForm({
           <input name="name" defaultValue={product?.name} required className={inputClassName} />
         </Field>
 
-        <Field label="Адрес" hint="латиницей, попадёт в ссылку">
-          <input
-            name="slug"
-            defaultValue={product?.slug}
-            required
-            placeholder="oversize-hoodie"
-            className={inputClassName}
-          />
-        </Field>
+        <div className="grid gap-6 sm:grid-cols-2">
+          <Field label="Артикул" hint="по нему узнаём вещь в заказе">
+            <input
+              name="sku"
+              defaultValue={product?.sku}
+              required
+              placeholder="OP-0001"
+              className={`${inputClassName} font-mono`}
+            />
+          </Field>
+
+          <Field label="Адрес" hint="латиницей, попадёт в ссылку">
+            <input
+              name="slug"
+              defaultValue={product?.slug}
+              required
+              placeholder="oversize-hoodie"
+              className={inputClassName}
+            />
+          </Field>
+        </div>
 
         <Field label="Описание">
           <textarea

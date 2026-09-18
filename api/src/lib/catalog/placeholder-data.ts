@@ -26,6 +26,7 @@ export const placeholderStyles: readonly ProductStyle[] = [
 export const placeholderProducts: readonly Product[] = [
   {
     slug: "oversize-hoodie",
+    sku: "OP-0001",
     name: "Худи оверсайз",
     description: "Плотный футер, свободная посадка, кулиска с металлическими люверсами.",
     typeSlug: "hoodie",
@@ -36,6 +37,7 @@ export const placeholderProducts: readonly Product[] = [
   },
   {
     slug: "cotton-tee",
+    sku: "OP-0002",
     name: "Футболка из плотного хлопка",
     description: "Хлопок 240 г/м², прямой силуэт, укреплённая горловина.",
     typeSlug: "tee",
@@ -46,6 +48,7 @@ export const placeholderProducts: readonly Product[] = [
   },
   {
     slug: "wide-jeans",
+    sku: "OP-0003",
     name: "Джинсы широкого кроя",
     description: "Плотный деним, высокая посадка, свободная штанина.",
     typeSlug: "jeans",
@@ -57,6 +60,7 @@ export const placeholderProducts: readonly Product[] = [
   },
   {
     slug: "bomber-jacket",
+    sku: "OP-0004",
     name: "Бомбер",
     description: "Тонкий утеплитель, резинки по низу и манжетам, потайные карманы.",
     typeSlug: "jacket",
@@ -67,6 +71,7 @@ export const placeholderProducts: readonly Product[] = [
   },
   {
     slug: "knit-beanie",
+    sku: "OP-0005",
     name: "Шапка бини",
     description: "Мериносовая шерсть, двойной отворот.",
     typeSlug: "accessory",
@@ -77,6 +82,7 @@ export const placeholderProducts: readonly Product[] = [
   },
   {
     slug: "poplin-shirt",
+    sku: "OP-0006",
     name: "Рубашка из поплина",
     description: "Хлопковый поплин, прямой крой, перламутровые пуговицы.",
     typeSlug: "shirt",
@@ -87,6 +93,7 @@ export const placeholderProducts: readonly Product[] = [
   },
   {
     slug: "cargo-trousers",
+    sku: "OP-0007",
     name: "Брюки карго",
     description: "Плотный хлопок, накладные карманы, регулируемый низ.",
     typeSlug: "trousers",
@@ -97,6 +104,7 @@ export const placeholderProducts: readonly Product[] = [
   },
   {
     slug: "heavy-sweatshirt",
+    sku: "OP-0008",
     name: "Свитшот",
     description: "Начёс изнутри, приспущенное плечо, широкая резинка по низу.",
     typeSlug: "sweatshirt",

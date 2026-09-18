@@ -10,6 +10,15 @@ export const slugSchema = z
   .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "В адресе только латиница, цифры и дефис");
 
 const nameSchema = z.string().trim().min(2, "Укажите название").max(80, "Слишком длинное название");
+
+/** Артикул пишут руками, поэтому разрешаем привычную запись: OP-0001, TEE/24-M. */
+const skuSchema = z
+  .string()
+  .trim()
+  .min(2, "Слишком короткий артикул")
+  .max(32, "Слишком длинный артикул")
+  .regex(/^[A-Za-z0-9][A-Za-z0-9./_-]*$/, "В артикуле только латиница, цифры и знаки . / _ -");
+
 const positionSchema = z.number().int().min(0).max(9999);
 
 /** Цена в сумах. Тийины не в обороте, поэтому дробей нет. */
@@ -30,6 +39,7 @@ export const imageSchema = z.object({
 
 export const productCreateSchema = z.object({
   slug: slugSchema,
+  sku: skuSchema,
   name: nameSchema,
   description: z.string().trim().max(2000, "Описание длиннее 2000 символов").default(""),
   price: priceSchema,

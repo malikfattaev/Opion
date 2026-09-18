@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { ProductForm } from "@/components/product-form";
+import { PageHeader } from "@/components/ui";
 import { listOptions } from "@/lib/api/catalog";
 
 export const metadata: Metadata = { title: "Новая вещь" };
@@ -10,7 +11,7 @@ export default async function NewProductPage() {
 
   return (
     <>
-      <h1 className="mt-10 font-display text-4xl leading-tight">Новая вещь</h1>
+      <PageHeader title="Новая вещь" description="Заполните карточку: её увидят на сайте и в мини-аппе." />
       <ProductForm types={types} styles={styles} />
     </>
   );

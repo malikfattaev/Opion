@@ -20,6 +20,7 @@ export type ProductQuery = {
 
 const PRODUCT_SELECTION = {
   slug: true,
+  sku: true,
   name: true,
   description: true,
   price: true,
@@ -32,6 +33,7 @@ const PRODUCT_SELECTION = {
 
 type ProductRow = {
   slug: string;
+  sku: string;
   name: string;
   description: string;
   price: number;
@@ -93,6 +95,7 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
 function toProduct(row: ProductRow): Product {
   return {
     slug: row.slug,
+    sku: row.sku,
     name: row.name,
     description: row.description,
     typeSlug: row.type.slug,

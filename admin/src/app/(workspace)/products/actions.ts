@@ -38,6 +38,7 @@ export async function saveProduct(_state: ProductFormState, formData: FormData):
 
   const input: ProductInput = {
     slug: readText(formData, "slug"),
+    sku: readText(formData, "sku"),
     name: readText(formData, "name"),
     description: readText(formData, "description"),
     price: price.value,

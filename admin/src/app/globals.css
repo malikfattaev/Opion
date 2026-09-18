@@ -10,6 +10,7 @@
   --color-accent: #f8f1e7;
   --color-accent-contrast: #000000;
   --color-danger: #e5715f;
+  --color-success: #7fb08a;
 
   --font-sans: var(--font-sans-body), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-display), ui-serif, Georgia, serif;

@@ -50,6 +50,7 @@ async function seedCatalog(): Promise<void> {
       update: {},
       create: {
         slug: product.slug,
+        sku: product.sku,
         name: product.name,
         description: product.description,
         price: product.price,

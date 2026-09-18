@@ -1,5 +1,11 @@
-import { fail, isUniqueViolation, notFound, ok, parseBody } from "@/lib/admin/respond";
-import { deleteProduct, findProduct, updateProduct, UnknownReferenceError } from "@/lib/admin/products";
+import { fail, notFound, ok, parseBody } from "@/lib/admin/respond";
+import {
+  deleteProduct,
+  duplicateProductMessage,
+  findProduct,
+  updateProduct,
+  UnknownReferenceError,
+} from "@/lib/admin/products";
 import { productUpdateSchema } from "@/lib/admin/schema";
 import { requireMember } from "@/lib/auth/guard";
 
@@ -39,8 +45,10 @@ export async function PATCH(request: Request, { params }: RouteContext<"/admin/p
       return fail(error.message, 422);
     }
 
-    if (isUniqueViolation(error)) {
-      return fail("Такой адрес уже занят.", 409);
+    const duplicate = duplicateProductMessage(error);
+
+    if (duplicate) {
+      return fail(duplicate, 409);
     }
 
     console.error("Админка: не удалось сохранить вещь", error);

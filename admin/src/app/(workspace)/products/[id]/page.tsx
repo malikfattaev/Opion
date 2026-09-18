@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { ProductForm } from "@/components/product-form";
+import { PageHeader } from "@/components/ui";
 import { findProduct, listOptions } from "@/lib/api/catalog";
 
 export async function generateMetadata({ params }: PageProps<"/products/[id]">): Promise<Metadata> {
@@ -24,7 +25,7 @@ export default async function EditProductPage({ params }: PageProps<"/products/[
 
   return (
     <>
-      <h1 className="mt-10 font-display text-4xl leading-tight">{product.name}</h1>
+      <PageHeader title={product.name} description={`Артикул ${product.sku}`} />
       <ProductForm product={product} types={types} styles={styles} />
     </>
   );

@@ -80,6 +80,8 @@ model OrderItem {
 
   /// Ссылка на каталог по slug: товар могут переименовать, заказ не должен меняться.
   productSlug String
+  /// Артикул на момент заказа: по нему вещь узнают на складе.
+  sku         String @default("")
   name        String
   size        String
   quantity    Int
@@ -119,8 +121,13 @@ model Style {
 }
 
 model Product {
-  id          String @id @default(cuid())
-  slug        String @unique
+  id   String @id @default(cuid())
+  slug String @unique
+
+  /// Артикул, который команда пишет руками. По нему узнают вещь в заказе,
+  /// когда из оплаты виден только скриншот перевода.
+  sku String @unique
+
   name        String
   description String @default("")
 

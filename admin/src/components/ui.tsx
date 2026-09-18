@@ -13,10 +13,8 @@ export function Field({
 }) {
   return (
     <label className="block">
-      <span className="text-xs tracking-widest text-ink-muted uppercase">
-        {label}
-        {hint ? <span className="ml-2 normal-case tracking-normal">({hint})</span> : null}
-      </span>
+      <span className="block text-xs tracking-widest text-ink-muted uppercase">{label}</span>
+      {hint ? <span className="mt-1 block text-xs text-ink-muted/80">{hint}</span> : null}
       <span className="mt-2 block">{children}</span>
     </label>
   );
@@ -24,6 +22,31 @@ export function Field({
 
 export const inputClassName =
   "w-full rounded-xl border border-line bg-transparent px-4 py-2.5 text-sm text-ink placeholder:text-ink-muted/60 focus:border-ink focus:outline-none";
+
+/** Шапка раздела: заголовок, пояснение и главное действие справа. */
+export function PageHeader({
+  title,
+  description,
+  meta,
+  action,
+}: {
+  title: string;
+  description: string;
+  meta?: string;
+  action?: React.ReactNode;
+}) {
+  return (
+    <div className="flex flex-wrap items-end justify-between gap-6 border-b border-line pt-10 pb-8">
+      <div>
+        <h1 className="font-display text-4xl leading-tight">{title}</h1>
+        <p className="mt-3 max-w-xl text-sm text-ink-muted">{description}</p>
+        {meta ? <p className="mt-4 text-xs tracking-widest text-ink-muted uppercase">{meta}</p> : null}
+      </div>
+
+      {action}
+    </div>
+  );
+}
 
 export function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return <div className={`rounded-2xl border border-line p-6 ${className}`}>{children}</div>;

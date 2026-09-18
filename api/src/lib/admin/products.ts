@@ -2,12 +2,14 @@ import "server-only";
 
 import { db } from "@/lib/db";
 
+import { uniqueViolationField } from "./respond";
 import type { ProductCreate, ProductUpdate } from "./schema";
 
 /** Вещь глазами админки: со связями, снятыми с витрины и служебными полями. */
 export type AdminProduct = {
   id: string;
   slug: string;
+  sku: string;
   name: string;
   description: string;
   price: number;
@@ -24,6 +26,7 @@ export type AdminProduct = {
 const SELECTION = {
   id: true,
   slug: true,
+  sku: true,
   name: true,
   description: true,
   price: true,
@@ -39,6 +42,18 @@ const SELECTION = {
 
 /** Раздел не найден: вызывающий код превращает это в понятную ошибку формы. */
 export class UnknownReferenceError extends Error {}
+
+/** У вещи два уникальных поля, и человеку важно знать, какое из них занято. */
+export function duplicateProductMessage(error: unknown): string | null {
+  switch (uniqueViolationField(error)) {
+    case "sku":
+      return "Такой артикул уже есть у другой вещи.";
+    case "slug":
+      return "Такой адрес уже занят.";
+    default:
+      return null;
+  }
+}
 
 export async function listProducts(): Promise<AdminProduct[]> {
   const rows = await db.product.findMany({
@@ -62,6 +77,7 @@ export async function createProduct(input: ProductCreate): Promise<AdminProduct>
   const row = await db.product.create({
     data: {
       slug: input.slug,
+      sku: input.sku,
       name: input.name,
       description: input.description,
       price: input.price,
@@ -95,6 +111,7 @@ export async function updateProduct(id: string, input: ProductUpdate): Promise<A
     where: { id },
     data: {
       ...(input.slug === undefined ? {} : { slug: input.slug }),
+      ...(input.sku === undefined ? {} : { sku: input.sku }),
       ...(input.name === undefined ? {} : { name: input.name }),
       ...(input.description === undefined ? {} : { description: input.description }),
       ...(input.price === undefined ? {} : { price: input.price }),
@@ -160,6 +177,7 @@ async function nextPosition(): Promise<number> {
 type ProductRow = {
   id: string;
   slug: string;
+  sku: string;
   name: string;
   description: string;
   price: number;
@@ -177,6 +195,7 @@ function toAdminProduct(row: ProductRow): AdminProduct {
   return {
     id: row.id,
     slug: row.slug,
+    sku: row.sku,
     name: row.name,
     description: row.description,
     price: row.price,

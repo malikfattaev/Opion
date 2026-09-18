@@ -17,6 +17,7 @@ const optionSchema = z.object({
 const productSchema = z.object({
   id: z.string(),
   slug: z.string(),
+  sku: z.string(),
   name: z.string(),
   description: z.string(),
   price: z.number(),
@@ -80,6 +81,7 @@ export async function deleteOption(kind: OptionKind, id: string): Promise<ApiRes
 
 export type ProductInput = {
   slug: string;
+  sku: string;
   name: string;
   description: string;
   price: number;

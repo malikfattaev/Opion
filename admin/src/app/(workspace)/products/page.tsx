@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { PlusIcon } from "@/components/icons";
 import { ProductRowActions } from "@/components/product-row-actions";
+import { EmptyState, PageHeader } from "@/components/ui";
 import { adminConfig } from "@/config/site";
-import { listOptions, listProducts } from "@/lib/api/catalog";
+import { listOptions, listProducts, type AdminProduct } from "@/lib/api/catalog";
 
 export const metadata: Metadata = { title: "Товары" };
 
@@ -22,53 +24,148 @@ export default async function ProductsPage() {
 
   return (
     <>
-      <div className="mt-10 flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="font-display text-4xl leading-tight">Товары</h1>
-          <p className="mt-3 max-w-xl text-sm text-ink-muted">
-            Всё, что видят покупатели на сайте и в мини-аппе.
-          </p>
-        </div>
-
-        <Link
-          href="/products/new"
-          className="rounded-full bg-accent px-6 py-2.5 text-sm text-accent-contrast transition-opacity hover:opacity-90"
-        >
-          Добавить вещь
-        </Link>
-      </div>
+      <PageHeader
+        title="Товары"
+        description="Всё, что видят покупатели на сайте и в мини-аппе."
+        meta={countLabel(products.length)}
+        action={
+          <Link
+            href="/products/new"
+            className="flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm text-accent-contrast transition-opacity hover:opacity-90"
+          >
+            <PlusIcon className="size-4" />
+            Добавить вещь
+          </Link>
+        }
+      />
 
       {products.length === 0 ? (
-        <p className="py-16 text-center text-sm text-ink-muted">Каталог пуст. Добавьте первую вещь.</p>
+        <EmptyState>Каталог пуст. Добавьте первую вещь.</EmptyState>
       ) : (
-        <ul className="mt-10 divide-y divide-line border-y border-line">
-          {products.map((product) => (
-            <li key={product.id} className="flex flex-wrap items-center gap-x-6 gap-y-2 py-4">
-              <div className="min-w-48 flex-1">
-                <Link href={`/products/${product.id}`} className="text-sm hover:underline underline-offset-4">
-                  {product.name}
-                </Link>
-                <p className="mt-1 text-xs text-ink-muted">
-                  {typeNames.get(product.typeSlug) ?? product.typeSlug}
-                  {product.styleSlugs.length > 0
-                    ? ` · ${product.styleSlugs.map((slug) => styleNames.get(slug) ?? slug).join(", ")}`
-                    : ""}
-                </p>
-              </div>
+        <div className="mt-8 overflow-x-auto rounded-2xl border border-line">
+          <table className="w-full min-w-3xl text-left text-sm">
+            <thead>
+              <tr className="border-b border-line text-xs tracking-widest whitespace-nowrap text-ink-muted uppercase">
+                <th scope="col" className="w-2/5 px-4 py-3 font-normal">
+                  Вещь
+                </th>
+                <th scope="col" className="px-4 py-3 font-normal">
+                  Артикул
+                </th>
+                <th scope="col" className="px-4 py-3 font-normal">
+                  Тип и стили
+                </th>
+                <th scope="col" className="px-4 py-3 text-right font-normal">
+                  Цена
+                </th>
+                <th scope="col" className="px-4 py-3 font-normal">
+                  Витрина
+                </th>
+                <th scope="col" className="px-4 py-3">
+                  <span className="sr-only">Действия</span>
+                </th>
+              </tr>
+            </thead>
 
-              <p className="text-sm tabular-nums">
-                {priceFormatter.format(product.price)} {adminConfig.currencyLabel}
-              </p>
+            <tbody className="divide-y divide-line">
+              {products.map((product) => (
+                <tr key={product.id} className="align-middle transition-colors hover:bg-surface/50">
+                  <td className="px-4 py-4">
+                    <div className="flex items-center gap-4">
+                      <Thumbnail product={product} />
 
-              <p className="w-28 text-xs text-ink-muted">
-                {product.isPublished ? "на витрине" : "скрыта"}
-              </p>
+                      <div className="min-w-0">
+                        <Link
+                          href={`/products/${product.id}`}
+                          className="underline-offset-4 hover:underline"
+                        >
+                          {product.name}
+                        </Link>
+                        <p className="mt-1 text-xs text-ink-muted">{product.slug}</p>
+                      </div>
+                    </div>
+                  </td>
 
-              <ProductRowActions id={product.id} />
-            </li>
-          ))}
-        </ul>
+                  <td className="px-4 py-4">
+                    <span className="inline-block rounded-md border border-line px-2 py-1 font-mono text-xs whitespace-nowrap">
+                      {product.sku}
+                    </span>
+                  </td>
+
+                  <td className="px-4 py-4">
+                    <p>{typeNames.get(product.typeSlug) ?? product.typeSlug}</p>
+                    <p className="mt-1 text-xs text-ink-muted">
+                      {product.styleSlugs.length === 0
+                        ? "без стиля"
+                        : product.styleSlugs.map((slug) => styleNames.get(slug) ?? slug).join(", ")}
+                    </p>
+                  </td>
+
+                  <td className="px-4 py-4 text-right whitespace-nowrap tabular-nums">
+                    <p>
+                      {priceFormatter.format(product.price)} {adminConfig.currencyLabel}
+                    </p>
+                    {product.comparePrice === null ? null : (
+                      <p className="mt-1 text-xs text-ink-muted line-through">
+                        {priceFormatter.format(product.comparePrice)}
+                      </p>
+                    )}
+                  </td>
+
+                  <td className="px-4 py-4">
+                    <ShelfBadge isPublished={product.isPublished} />
+                  </td>
+
+                  <td className="px-4 py-4">
+                    <ProductRowActions id={product.id} name={product.name} />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </>
   );
+}
+
+/** Первое фото вещи. Пока его не загрузили, на месте карточки стоит пустая рамка. */
+function Thumbnail({ product }: { product: AdminProduct }) {
+  const image = product.images[0];
+
+  return image ? (
+    // eslint-disable-next-line @next/next/no-img-element -- фото лежат на чужих доменах, оптимизатор их не обслуживает
+    <img
+      src={image.url}
+      alt=""
+      className="size-12 shrink-0 rounded-lg border border-line object-cover"
+    />
+  ) : (
+    <span
+      aria-hidden
+      className="flex size-12 shrink-0 items-center justify-center rounded-lg border border-line bg-surface text-xs text-ink-muted"
+    >
+      нет
+    </span>
+  );
+}
+
+function ShelfBadge({ isPublished }: { isPublished: boolean }) {
+  return (
+    <span className="flex items-center gap-2 text-xs whitespace-nowrap text-ink-muted">
+      <span
+        aria-hidden
+        className={`size-1.5 rounded-full ${isPublished ? "bg-success" : "bg-ink-muted/50"}`}
+      />
+      {isPublished ? "на витрине" : "скрыта"}
+    </span>
+  );
+}
+
+/** «1 вещь», «2 вещи», «5 вещей»: русские окончания руками, Intl их не знает. */
+function countLabel(count: number): string {
+  const rules = new Intl.PluralRules(adminConfig.locale).select(count);
+  const word = rules === "one" ? "вещь" : rules === "few" ? "вещи" : "вещей";
+
+  return `${count} ${word}`;
 }

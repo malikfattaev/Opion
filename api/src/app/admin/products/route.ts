@@ -1,5 +1,10 @@
-import { fail, isUniqueViolation, ok, parseBody } from "@/lib/admin/respond";
-import { createProduct, listProducts, UnknownReferenceError } from "@/lib/admin/products";
+import { fail, ok, parseBody } from "@/lib/admin/respond";
+import {
+  createProduct,
+  duplicateProductMessage,
+  listProducts,
+  UnknownReferenceError,
+} from "@/lib/admin/products";
 import { productCreateSchema } from "@/lib/admin/schema";
 import { requireMember } from "@/lib/auth/guard";
 
@@ -31,8 +36,10 @@ export async function POST(request: Request) {
       return fail(error.message, 422);
     }
 
-    if (isUniqueViolation(error)) {
-      return fail("Такой адрес уже занят.", 409);
+    const duplicate = duplicateProductMessage(error);
+
+    if (duplicate) {
+      return fail(duplicate, 409);
     }
 
     console.error("Админка: не удалось создать вещь", error);

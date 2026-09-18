@@ -68,6 +68,7 @@ export async function POST(request: Request) {
 
     lines.push({
       productSlug: product.slug,
+      sku: product.sku,
       name: product.name,
       size: item.size,
       quantity: item.quantity,

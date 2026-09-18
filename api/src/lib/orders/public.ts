@@ -9,7 +9,7 @@ export type PublicOrder = {
   statusLabel: string;
   total: number;
   createdAt: string;
-  items: { productSlug: string; name: string; size: string; quantity: number; unitPrice: number }[];
+  items: { productSlug: string; sku: string; name: string; size: string; quantity: number; unitPrice: number }[];
 };
 
 export function toPublicOrder(order: StoredOrder): PublicOrder {

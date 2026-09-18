@@ -6,6 +6,7 @@ import { isAwaitingDecision, statusLabel } from "./status";
 
 export type ResolvedOrderLine = {
   productSlug: string;
+  sku: string;
   name: string;
   size: string;
   quantity: number;
@@ -45,11 +46,17 @@ export function buildOrderCaption(order: StoredOrder): string {
   return rows.join("\n");
 }
 
+/**
+ * Артикул идёт первой строкой позиции: из оплаты видно только скриншот перевода,
+ * и собирать заказ команда будет именно по нему.
+ */
 function formatItems(order: StoredOrder): string {
   return order.items
-    .map(
-      (line) =>
-        `• ${escapeHtml(line.name)}, ${escapeHtml(line.size)} × ${line.quantity} · ${formatPrice(line.unitPrice * line.quantity)}`,
+    .map((line) =>
+      [
+        `• <code>${escapeHtml(line.sku)}</code> ${escapeHtml(line.name)}`,
+        `  ${escapeHtml(line.size)} × ${line.quantity} · ${formatPrice(line.unitPrice * line.quantity)}`,
+      ].join("\n"),
     )
     .join("\n");
 }
