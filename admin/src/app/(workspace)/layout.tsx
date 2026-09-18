@@ -24,7 +24,7 @@ export default async function WorkspaceLayout({ children }: LayoutProps<"/">) {
     <div className="lg:pl-64">
       <Sidebar member={result.data.member} />
 
-      <main className="mx-auto w-full max-w-6xl px-5 pb-24 lg:px-10">{children}</main>
+      <main className="mx-auto w-full max-w-6xl px-5 pb-24 lg:px-8">{children}</main>
     </div>
   );
 }

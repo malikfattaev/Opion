@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { logout } from "@/app/login/actions";
+import { LogoutIcon } from "@/components/icons";
 import { SidebarLink } from "@/components/sidebar-link";
 import { adminConfig, adminNavigation, adminRoleLabels } from "@/config/site";
 import type { Member } from "@/lib/api/session";
@@ -25,7 +26,8 @@ export function Sidebar({ member }: { member: Member }) {
           />
         </Link>
 
-        <div className="lg:hidden">
+        <div className="flex items-center gap-3 lg:hidden">
+          <Avatar name={member.name} />
           <LogoutButton />
         </div>
       </div>
@@ -50,11 +52,15 @@ export function Sidebar({ member }: { member: Member }) {
         </div>
       </nav>
 
-      <div className="mt-auto hidden border-t border-line px-3 pt-5 lg:block">
-        <p className="text-sm">{member.name}</p>
-        <p className="mt-0.5 text-xs text-ink-muted">{adminRoleLabels[member.role] ?? member.role}</p>
+      <div className="mt-auto hidden items-center gap-3 border-t border-line pt-5 lg:flex">
+        <Avatar name={member.name} />
 
-        <div className="mt-3">
+        <div className="min-w-0">
+          <p className="truncate text-sm">{member.name}</p>
+          <p className="text-xs text-ink-muted">{adminRoleLabels[member.role] ?? member.role}</p>
+        </div>
+
+        <div className="ml-auto">
           <LogoutButton />
         </div>
       </div>
@@ -62,11 +68,28 @@ export function Sidebar({ member }: { member: Member }) {
   );
 }
 
+/** Фотографий у команды нет, поэтому в кружке первая буква имени. */
+function Avatar({ name }: { name: string }) {
+  return (
+    <span
+      aria-hidden
+      className="flex size-9 shrink-0 items-center justify-center rounded-full border border-line bg-surface text-sm"
+    >
+      {[...name.trim()][0]?.toUpperCase() ?? "?"}
+    </span>
+  );
+}
+
 function LogoutButton() {
   return (
     <form action={logout}>
-      <button type="submit" className="text-xs text-ink-muted underline underline-offset-4 hover:text-ink">
-        Выйти
+      <button
+        type="submit"
+        aria-label="Выйти"
+        title="Выйти"
+        className="flex size-9 items-center justify-center rounded-full text-ink-muted transition-colors hover:bg-surface hover:text-ink"
+      >
+        <LogoutIcon className="size-4.5" />
       </button>
     </form>
   );

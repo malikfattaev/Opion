@@ -2,6 +2,8 @@ import "server-only";
 
 import { z } from "zod";
 
+import type { OptionKind } from "@/config/site";
+
 import { apiRead, apiRequest, type ApiResult } from "./client";
 
 /** Формы ответов API. Совпадают с тем, что отдаёт сервис, и проверяются на входе. */
@@ -33,14 +35,6 @@ const productSchema = z.object({
 
 export type AdminOption = z.infer<typeof optionSchema>;
 export type AdminProduct = z.infer<typeof productSchema>;
-
-/** Тип и стиль устроены одинаково, различается только раздел API. */
-export type OptionKind = "types" | "styles";
-
-export const OPTION_TITLES: Record<OptionKind, { singular: string; plural: string }> = {
-  types: { singular: "Тип", plural: "Типы" },
-  styles: { singular: "Стиль", plural: "Стили" },
-};
 
 const optionsSchema = z.object({ options: z.array(optionSchema) });
 const productsSchema = z.object({ products: z.array(productSchema) });

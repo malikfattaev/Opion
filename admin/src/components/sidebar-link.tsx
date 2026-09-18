@@ -30,8 +30,6 @@ export function SidebarLink({ item }: { item: NavigationItem }) {
       <Icon className="size-4.5 shrink-0" />
 
       <span className="text-sm whitespace-nowrap">{item.label}</span>
-
-      <span className="ml-auto hidden text-xs text-ink-muted lg:block">{item.hint}</span>
     </Link>
   );
 }

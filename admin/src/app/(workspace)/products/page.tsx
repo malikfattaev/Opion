@@ -43,7 +43,7 @@ export default async function ProductsPage() {
         <EmptyState>Каталог пуст. Добавьте первую вещь.</EmptyState>
       ) : (
         <div className="mt-8 overflow-x-auto rounded-2xl border border-line">
-          <table className="w-full min-w-3xl text-left text-sm">
+          <table className="w-full min-w-2xl text-left text-sm">
             <thead>
               <tr className="border-b border-line text-xs tracking-widest whitespace-nowrap text-ink-muted uppercase">
                 <th scope="col" className="w-2/5 px-4 py-3 font-normal">
@@ -116,7 +116,7 @@ export default async function ProductsPage() {
                     <ShelfBadge isPublished={product.isPublished} />
                   </td>
 
-                  <td className="px-4 py-4">
+                  <td className="py-4 pr-4 pl-2">
                     <ProductRowActions id={product.id} name={product.name} />
                   </td>
                 </tr>

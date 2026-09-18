@@ -3,80 +3,125 @@
 import { useActionState, useState } from "react";
 
 import { removeOption, saveOption, type OptionFormState } from "@/app/(workspace)/options-actions";
-import { Card, ErrorText, Field, inputClassName, PrimaryButton } from "@/components/ui";
-import type { AdminOption, OptionKind } from "@/lib/api/catalog";
+import { PlusIcon } from "@/components/icons";
+import { Modal } from "@/components/modal";
+import { EmptyState, ErrorText, Field, inputClassName, PageHeader, PrimaryButton } from "@/components/ui";
+import { optionSections, type OptionKind } from "@/config/site";
+import type { AdminOption } from "@/lib/api/catalog";
 
 const INITIAL: OptionFormState = { message: null };
 
+/** Что правим прямо сейчас: `null` - окно закрыто, пустой объект - создаём новое. */
+type Editing = { option?: AdminOption } | null;
+
 /**
- * Список типов или стилей с формой добавления. Раздел один и тот же по устройству,
- * поэтому отличается только подписями и адресом API.
+ * Список типов или стилей. Раздел один и тот же по устройству, поэтому
+ * отличается только подписями и адресом API.
  */
 export function OptionsManager({
   kind,
-  title,
+  description,
   options,
 }: {
   kind: OptionKind;
-  title: string;
+  description: string;
   options: readonly AdminOption[];
 }) {
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editing, setEditing] = useState<Editing>(null);
+  const titles = optionSections[kind];
 
   return (
-    <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_20rem]">
-      <section>
-        <h2 className="text-xs tracking-widest text-ink-muted uppercase">Список</h2>
+    <>
+      <PageHeader
+        title={titles.plural}
+        description={description}
+        meta={countLabel(options.length)}
+        action={
+          <button
+            type="button"
+            onClick={() => setEditing({})}
+            className="flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm text-accent-contrast transition-opacity hover:opacity-90"
+          >
+            <PlusIcon className="size-4" />
+            {titles.add}
+          </button>
+        }
+      />
 
-        {options.length === 0 ? (
-          <p className="mt-6 text-sm text-ink-muted">Пока пусто. Добавьте первый раздел справа.</p>
-        ) : (
-          <ul className="mt-4 divide-y divide-line border-y border-line">
-            {options.map((option) => (
-              <li key={option.id} className="py-4">
-                {editingId === option.id ? (
-                  <OptionForm
-                    kind={kind}
-                    option={option}
-                    submitLabel="Сохранить"
-                    onDone={() => setEditingId(null)}
-                    onCancel={() => setEditingId(null)}
-                  />
-                ) : (
-                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-                    <span className="text-sm">{option.name}</span>
-                    <span className="text-xs text-ink-muted">{option.slug}</span>
-                    <span className="text-xs text-ink-muted">
-                      {option.productCount === 0 ? "не используется" : `вещей: ${option.productCount}`}
+      {options.length === 0 ? (
+        <EmptyState>{titles.empty}</EmptyState>
+      ) : (
+        <div className="mt-8 overflow-x-auto rounded-2xl border border-line">
+          <table className="w-full min-w-xl text-left text-sm">
+            <thead>
+              <tr className="border-b border-line text-xs tracking-widest whitespace-nowrap text-ink-muted uppercase">
+                <th scope="col" className="w-2/5 px-4 py-3 font-normal">
+                  Название
+                </th>
+                <th scope="col" className="px-4 py-3 font-normal">
+                  Адрес
+                </th>
+                <th scope="col" className="px-4 py-3 font-normal">
+                  Вещей
+                </th>
+                <th scope="col" className="px-4 py-3">
+                  <span className="sr-only">Действия</span>
+                </th>
+              </tr>
+            </thead>
+
+            <tbody className="divide-y divide-line">
+              {options.map((option) => (
+                <tr key={option.id} className="transition-colors hover:bg-surface/50">
+                  <td className="px-4 py-4">{option.name}</td>
+
+                  <td className="px-4 py-4">
+                    <span className="inline-block rounded-md border border-line px-2 py-1 font-mono text-xs whitespace-nowrap">
+                      {option.slug}
                     </span>
+                  </td>
 
-                    <div className="ml-auto flex items-center gap-4">
+                  <td className="px-4 py-4 text-ink-muted tabular-nums">
+                    {option.productCount === 0 ? "—" : option.productCount}
+                  </td>
+
+                  <td className="px-4 py-4">
+                    <div className="flex items-center justify-end gap-4">
                       <button
                         type="button"
-                        onClick={() => setEditingId(option.id)}
+                        onClick={() => setEditing({ option })}
                         className="text-xs text-ink-muted underline underline-offset-4 hover:text-ink"
                       >
                         Изменить
                       </button>
 
-                      <RemoveOption kind={kind} id={option.id} />
+                      <RemoveOption kind={kind} option={option} />
                     </div>
-                  </div>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      <Card className="h-fit">
-        <h2 className="text-xs tracking-widest text-ink-muted uppercase">Добавить {title.toLowerCase()}</h2>
-
-        <div className="mt-5">
-          <OptionForm kind={kind} submitLabel="Добавить" />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-      </Card>
-    </div>
+      )}
+
+      <Modal
+        open={editing !== null}
+        title={editing?.option ? titles.edit : titles.create}
+        description="Название видят покупатели, адрес попадает в ссылку фильтра."
+        onClose={() => setEditing(null)}
+      >
+        {editing === null ? null : (
+          <OptionForm
+            kind={kind}
+            option={editing.option}
+            submitLabel={editing.option ? "Сохранить" : "Добавить"}
+            onDone={() => setEditing(null)}
+            onCancel={() => setEditing(null)}
+          />
+        )}
+      </Modal>
+    </>
   );
 }
 
@@ -90,15 +135,15 @@ function OptionForm({
   kind: OptionKind;
   option?: AdminOption;
   submitLabel: string;
-  onDone?: () => void;
-  onCancel?: () => void;
+  onDone: () => void;
+  onCancel: () => void;
 }) {
   const [state, formAction, isPending] = useActionState(
     async (previous: OptionFormState, formData: FormData) => {
       const next = await saveOption(previous, formData);
 
       if (next.message === null) {
-        onDone?.();
+        onDone();
       }
 
       return next;
@@ -107,21 +152,21 @@ function OptionForm({
   );
 
   return (
-    <form action={formAction} className="flex flex-col gap-4">
+    <form action={formAction} className="flex flex-col gap-5">
       <input type="hidden" name="kind" value={kind} />
       {option ? <input type="hidden" name="id" value={option.id} /> : null}
 
       <Field label="Название">
-        <input name="name" defaultValue={option?.name} required className={inputClassName} />
+        <input name="name" defaultValue={option?.name} required autoFocus className={inputClassName} />
       </Field>
 
-      <Field label="Адрес" hint="латиницей">
+      <Field label="Адрес" hint="латиницей, попадёт в ссылку">
         <input
           name="slug"
           defaultValue={option?.slug}
           required
           placeholder="hoodie"
-          className={inputClassName}
+          className={`${inputClassName} font-mono`}
         />
       </Field>
 
@@ -132,37 +177,48 @@ function OptionForm({
           {isPending ? "Сохраняем…" : submitLabel}
         </PrimaryButton>
 
-        {onCancel ? (
-          <button
-            type="button"
-            onClick={onCancel}
-            className="text-sm text-ink-muted underline underline-offset-4 hover:text-ink"
-          >
-            Отмена
-          </button>
-        ) : null}
+        <button
+          type="button"
+          onClick={onCancel}
+          className="rounded-full border border-line px-6 py-2.5 text-sm text-ink-muted transition-colors hover:border-ink-muted hover:text-ink"
+        >
+          Отмена
+        </button>
       </div>
     </form>
   );
 }
 
-function RemoveOption({ kind, id }: { kind: OptionKind; id: string }) {
+function RemoveOption({ kind, option }: { kind: OptionKind; option: AdminOption }) {
   const [state, formAction, isPending] = useActionState(removeOption, INITIAL);
 
   return (
     <form action={formAction} className="flex items-center gap-3">
       <input type="hidden" name="kind" value={kind} />
-      <input type="hidden" name="id" value={id} />
+      <input type="hidden" name="id" value={option.id} />
 
       <ErrorText>{state.message}</ErrorText>
 
       <button
         type="submit"
         disabled={isPending}
+        onClick={(event) => {
+          if (!window.confirm(`Удалить «${option.name}»?`)) {
+            event.preventDefault();
+          }
+        }}
         className="text-xs text-ink-muted underline underline-offset-4 hover:text-danger disabled:opacity-40"
       >
         Удалить
       </button>
     </form>
   );
+}
+
+/** «1 раздел», «2 раздела», «5 разделов»: русские окончания руками. */
+function countLabel(count: number): string {
+  const rule = new Intl.PluralRules("ru").select(count);
+  const word = rule === "one" ? "раздел" : rule === "few" ? "раздела" : "разделов";
+
+  return `${count} ${word}`;
 }

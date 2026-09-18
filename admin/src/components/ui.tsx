@@ -37,19 +37,15 @@ export function PageHeader({
 }) {
   return (
     <div className="flex flex-wrap items-end justify-between gap-6 border-b border-line pt-10 pb-8">
-      <div>
+      <div className="min-w-64 flex-1">
         <h1 className="font-display text-4xl leading-tight">{title}</h1>
         <p className="mt-3 max-w-xl text-sm text-ink-muted">{description}</p>
         {meta ? <p className="mt-4 text-xs tracking-widest text-ink-muted uppercase">{meta}</p> : null}
       </div>
 
-      {action}
+      {action ? <div className="shrink-0">{action}</div> : null}
     </div>
   );
-}
-
-export function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return <div className={`rounded-2xl border border-line p-6 ${className}`}>{children}</div>;
 }
 
 export function PrimaryButton({

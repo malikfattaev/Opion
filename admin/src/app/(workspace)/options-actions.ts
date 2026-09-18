@@ -2,7 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 
-import { createOption, deleteOption, updateOption, type OptionKind } from "@/lib/api/catalog";
+import type { OptionKind } from "@/config/site";
+import { createOption, deleteOption, updateOption } from "@/lib/api/catalog";
 
 export type OptionFormState = { message: string | null };
 
