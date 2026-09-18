@@ -17,11 +17,20 @@ export type AdminSale = {
   telegramUsername: string | null;
   total: number;
   items: { sku: string; name: string; size: string; quantity: number; unitPrice: number }[];
+  /** Себестоимость заказа и то, что от него осталось. */
+  cost: number;
+  profit: number;
   createdAt: string;
 };
 
-/** Месяц кассы: сколько заказов и денег принесло. */
-export type CashflowMonth = { month: string; orders: number; revenue: number };
+/** Месяц кассы: приход, закупка и что осталось. */
+export type CashflowMonth = {
+  month: string;
+  orders: number;
+  revenue: number;
+  cost: number;
+  profit: number;
+};
 
 /** Деньгами считаем только сверенные заказы: новый может и не подтвердиться. */
 const PAID: OrderStatus[] = [OrderStatus.CONFIRMED, OrderStatus.SHIPPED, OrderStatus.DONE];
@@ -46,28 +55,40 @@ export async function listSales(): Promise<AdminSale[]> {
       total: true,
       createdAt: true,
       items: {
-        select: { sku: true, name: true, size: true, quantity: true, unitPrice: true },
+        select: { sku: true, name: true, size: true, quantity: true, unitPrice: true, unitCost: true },
         orderBy: { id: "asc" },
       },
     },
   });
 
-  return rows.map((row) => ({
-    id: row.id,
-    number: orderNumber(row),
-    status: row.status,
-    statusLabel: statusLabel(row.status),
-    source: row.source,
-    customer: `${row.firstName} ${row.lastName}`,
-    phone: row.phone,
-    telegramUsername: row.telegramUsername,
-    total: row.total,
-    items: row.items,
-    createdAt: row.createdAt.toISOString(),
-  }));
+  return rows.map((row) => {
+    const cost = row.items.reduce((sum, item) => sum + item.unitCost * item.quantity, 0);
+
+    return {
+      id: row.id,
+      number: orderNumber(row),
+      status: row.status,
+      statusLabel: statusLabel(row.status),
+      source: row.source,
+      customer: `${row.firstName} ${row.lastName}`,
+      phone: row.phone,
+      telegramUsername: row.telegramUsername,
+      total: row.total,
+      items: row.items.map((item) => ({
+        sku: item.sku,
+        name: item.name,
+        size: item.size,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+      })),
+      cost,
+      profit: row.total - cost,
+      createdAt: row.createdAt.toISOString(),
+    };
+  });
 }
 
-type CashflowRow = { month: Date; orders: number; revenue: number };
+type CashflowRow = { month: Date; orders: number; revenue: number; cost: number };
 
 /**
  * Касса по месяцам. Группировку по месяцу Prisma не умеет, поэтому считает
@@ -75,11 +96,16 @@ type CashflowRow = { month: Date; orders: number; revenue: number };
  */
 export async function readCashflow(): Promise<CashflowMonth[]> {
   const rows = await db.$queryRaw<CashflowRow[]>`
-    SELECT date_trunc('month', "createdAt") AS month,
+    SELECT date_trunc('month', o."createdAt") AS month,
            count(*)::int AS orders,
-           coalesce(sum("total"), 0)::int AS revenue
-    FROM "Order"
-    WHERE "status" = ANY (${PAID}::"OrderStatus"[])
+           coalesce(sum(o."total"), 0)::int AS revenue,
+           coalesce(sum(
+             (SELECT coalesce(sum(i."unitCost" * i."quantity"), 0)
+              FROM "OrderItem" i
+              WHERE i."orderId" = o."id")
+           ), 0)::int AS cost
+    FROM "Order" o
+    WHERE o."status" = ANY (${PAID}::"OrderStatus"[])
     GROUP BY 1
     ORDER BY 1 DESC
     LIMIT ${CASHFLOW_MONTHS}
@@ -89,5 +115,7 @@ export async function readCashflow(): Promise<CashflowMonth[]> {
     month: row.month.toISOString(),
     orders: row.orders,
     revenue: row.revenue,
+    cost: row.cost,
+    profit: row.revenue - row.cost,
   }));
 }

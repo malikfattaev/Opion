@@ -15,6 +15,7 @@ export type AdminProduct = {
   description: string;
   price: number;
   comparePrice: number | null;
+  costPrice: number | null;
   sizes: string[];
   typeSlug: string;
   styleSlugs: string[];
@@ -32,6 +33,7 @@ const SELECTION = {
   description: true,
   price: true,
   comparePrice: true,
+  costPrice: true,
   sizes: true,
   isPublished: true,
   position: true,
@@ -83,6 +85,7 @@ export async function createProduct(input: ProductCreate): Promise<AdminProduct>
       description: input.description,
       price: input.price,
       comparePrice: input.comparePrice ?? null,
+      costPrice: input.costPrice ?? null,
       sizes: input.sizes,
       isPublished: input.isPublished,
       position: input.position ?? (await nextPosition()),
@@ -119,6 +122,7 @@ export async function updateProduct(id: string, input: ProductUpdate): Promise<A
       ...(input.description === undefined ? {} : { description: input.description }),
       ...(input.price === undefined ? {} : { price: input.price }),
       ...(input.comparePrice === undefined ? {} : { comparePrice: input.comparePrice ?? null }),
+      ...(input.costPrice === undefined ? {} : { costPrice: input.costPrice ?? null }),
       ...(input.sizes === undefined ? {} : { sizes: input.sizes }),
       ...(input.isPublished === undefined ? {} : { isPublished: input.isPublished }),
       ...(input.position === undefined ? {} : { position: input.position }),
@@ -214,6 +218,7 @@ type ProductRow = {
   description: string;
   price: number;
   comparePrice: number | null;
+  costPrice: number | null;
   sizes: string[];
   isPublished: boolean;
   position: number;
@@ -232,6 +237,7 @@ function toAdminProduct(row: ProductRow): AdminProduct {
     description: row.description,
     price: row.price,
     comparePrice: row.comparePrice,
+    costPrice: row.costPrice,
     sizes: row.sizes,
     typeSlug: row.type.slug,
     styleSlugs: row.styles.map(({ style }) => style.slug),

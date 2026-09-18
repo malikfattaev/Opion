@@ -24,6 +24,7 @@ const productSchema = z.object({
   description: z.string(),
   price: z.number(),
   comparePrice: z.number().nullable(),
+  costPrice: z.number().nullable(),
   sizes: z.array(z.string()),
   typeSlug: z.string(),
   styleSlugs: z.array(z.string()),
@@ -80,6 +81,7 @@ export type ProductInput = {
   description: string;
   price: number;
   comparePrice: number | null;
+  costPrice: number | null;
   typeSlug: string;
   styleSlugs: string[];
   sizes: string[];

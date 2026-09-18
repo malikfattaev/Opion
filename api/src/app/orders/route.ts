@@ -1,5 +1,5 @@
 import { OrderSource } from "@/generated/prisma/enums";
-import { getProductBySlug } from "@/lib/catalog";
+import { getProductForOrder } from "@/lib/catalog";
 import { jsonResponse, preflight } from "@/lib/cors";
 import type { ResolvedOrderLine } from "@/lib/orders/message";
 import { toPublicOrder } from "@/lib/orders/public";
@@ -56,7 +56,7 @@ export async function POST(request: Request) {
   const lines: ResolvedOrderLine[] = [];
 
   for (const item of parsed.data.items) {
-    const product = await getProductBySlug(item.productSlug);
+    const product = await getProductForOrder(item.productSlug);
 
     if (!product) {
       return fail(request, "Одной из вещей в корзине больше нет в каталоге.", 409);
@@ -73,6 +73,7 @@ export async function POST(request: Request) {
       size: item.size,
       quantity: item.quantity,
       unitPrice: product.price,
+      unitCost: product.costPrice,
     });
   }
 

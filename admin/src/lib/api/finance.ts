@@ -23,6 +23,8 @@ const saleSchema = z.object({
       unitPrice: z.number(),
     }),
   ),
+  cost: z.number(),
+  profit: z.number(),
   createdAt: z.iso.datetime(),
 });
 
@@ -30,6 +32,8 @@ const monthSchema = z.object({
   month: z.iso.datetime(),
   orders: z.number(),
   revenue: z.number(),
+  cost: z.number(),
+  profit: z.number(),
 });
 
 export type AdminSale = z.infer<typeof saleSchema>;

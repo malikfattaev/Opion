@@ -20,6 +20,13 @@ export function toPublicOrder(order: StoredOrder): PublicOrder {
     statusLabel: statusLabel(order.status),
     total: order.total,
     createdAt: order.createdAt.toISOString(),
-    items: order.items.map((item) => ({ ...item })),
+    items: order.items.map((item) => ({
+      productSlug: item.productSlug,
+      sku: item.sku,
+      name: item.name,
+      size: item.size,
+      quantity: item.quantity,
+      unitPrice: item.unitPrice,
+    })),
   };
 }

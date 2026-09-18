@@ -30,6 +30,7 @@ export default async function SalesPage() {
                 <th scope="col" className="w-2/5 px-4 py-3 font-normal">Покупатель</th>
                 <th scope="col" className="px-4 py-3 font-normal">Состав</th>
                 <th scope="col" className="px-4 py-3 text-right font-normal">Сумма</th>
+                <th scope="col" className="px-4 py-3 text-right font-normal">Прибыль</th>
                 <th scope="col" className="px-4 py-3 font-normal">Статус</th>
               </tr>
             </thead>
@@ -62,6 +63,10 @@ export default async function SalesPage() {
                   </td>
 
                   <td className="px-4 py-4 text-right whitespace-nowrap tabular-nums">{formatPrice(sale.total)}</td>
+
+                  <td className="px-4 py-4 text-right whitespace-nowrap text-ink-muted tabular-nums">
+                    {formatPrice(sale.profit)}
+                  </td>
 
                   <td className="px-4 py-4 text-xs whitespace-nowrap text-ink-muted">{sale.statusLabel}</td>
                 </tr>

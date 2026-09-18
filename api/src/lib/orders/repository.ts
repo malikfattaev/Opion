@@ -53,7 +53,15 @@ const ORDER_SELECTION = {
   decidedAt: true,
   createdAt: true,
   items: {
-    select: { productSlug: true, sku: true, name: true, size: true, quantity: true, unitPrice: true },
+    select: {
+      productSlug: true,
+      sku: true,
+      name: true,
+      size: true,
+      quantity: true,
+      unitPrice: true,
+      unitCost: true,
+    },
     orderBy: { id: "asc" },
   },
 } as const;

@@ -84,6 +84,16 @@ export function ProductForm({
           </Field>
         </div>
 
+        <Field label="Себестоимость" hint="только для нас, в каталог не уходит">
+          <input
+            name="costPrice"
+            inputMode="numeric"
+            defaultValue={product?.costPrice ?? ""}
+            placeholder="210000"
+            className={inputClassName}
+          />
+        </Field>
+
         <Field label="Размеры" hint="по одному в строке">
           <textarea
             name="sizes"

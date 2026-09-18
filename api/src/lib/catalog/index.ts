@@ -82,6 +82,18 @@ export async function getProducts({
   return rows.map(toProduct);
 }
 
+/** Вещь для оформления заказа: то же, что на витрине, плюс закрытая себестоимость. */
+export type OrderableProduct = Product & { costPrice: number };
+
+export async function getProductForOrder(slug: string): Promise<OrderableProduct | null> {
+  const row = await db.product.findFirst({
+    where: { slug, isPublished: true },
+    select: { ...PRODUCT_SELECTION, costPrice: true },
+  });
+
+  return row ? { ...toProduct(row), costPrice: row.costPrice ?? 0 } : null;
+}
+
 export async function getProductBySlug(slug: string): Promise<Product | null> {
   const row = await db.product.findFirst({
     where: { slug, isPublished: true },

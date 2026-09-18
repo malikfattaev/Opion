@@ -18,6 +18,7 @@ export default async function DashboardPage() {
         <Tile title="Продано вещей" value={formatNumber(stats.sales.items)} note={`заказов: ${formatNumber(stats.sales.orders)}`} />
         <Tile title="Ждут подтверждения" value={formatNumber(stats.orders.awaiting)} note={`всего заказов: ${formatNumber(stats.orders.total)}`} />
         <Tile title="Выручка" value={formatPrice(stats.sales.revenue)} note={`за 30 дней: ${formatPrice(stats.sales.lastMonthRevenue)}`} />
+        <Tile title="Прибыль" value={formatPrice(stats.sales.profit)} note={`себестоимость: ${formatPrice(stats.sales.cost)}`} />
         <Tile title="Средний чек" value={formatPrice(stats.sales.averageCheck)} />
         <Tile title="Разделы" value={`${formatNumber(stats.catalog.types)} / ${formatNumber(stats.catalog.styles)}`} note="типов и стилей" />
       </div>

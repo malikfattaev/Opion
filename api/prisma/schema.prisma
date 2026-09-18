@@ -86,6 +86,8 @@ model OrderItem {
   size        String
   quantity    Int
   unitPrice   Int
+  /// Себестоимость на момент заказа: закупка дорожает, прибыль прошлого месяца нет.
+  unitCost    Int @default(0)
 
   order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
@@ -135,6 +137,8 @@ model Product {
   price Int
   /// Старая цена для зачёркивания, если вещь со скидкой.
   comparePrice Int?
+  /// Во сколько вещь обошлась нам. Наружу не уходит: только админка и отчёты.
+  costPrice Int?
 
   /// Размеры в том порядке, в каком их показываем: S, M, L или 44, 46, 48.
   sizes String[]

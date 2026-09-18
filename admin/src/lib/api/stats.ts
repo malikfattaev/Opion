@@ -16,6 +16,8 @@ const statsSchema = z.object({
     orders: z.number(),
     items: z.number(),
     revenue: z.number(),
+    cost: z.number(),
+    profit: z.number(),
     averageCheck: z.number(),
     lastMonthRevenue: z.number(),
   }),

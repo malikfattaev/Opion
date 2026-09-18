@@ -44,6 +44,7 @@ export const productCreateSchema = z.object({
   description: z.string().trim().max(2000, "Описание длиннее 2000 символов").default(""),
   price: priceSchema,
   comparePrice: priceSchema.nullable().optional(),
+  costPrice: priceSchema.nullable().optional(),
   typeSlug: slugSchema,
   styleSlugs: z.array(slugSchema).max(20).default([]),
   sizes: z.array(z.string().trim().min(1).max(12)).min(1, "Добавьте хотя бы один размер").max(30),

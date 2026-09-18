@@ -9,7 +9,8 @@ export const metadata: Metadata = { title: "Кешфлоу" };
 export default async function CashflowPage() {
   const months = await readCashflow();
   const peak = Math.max(...months.map((month) => month.revenue), 1);
-  const total = months.reduce((sum, month) => sum + month.revenue, 0);
+  const revenue = months.reduce((sum, month) => sum + month.revenue, 0);
+  const profit = months.reduce((sum, month) => sum + month.profit, 0);
 
   return (
     <>
@@ -24,9 +25,11 @@ export default async function CashflowPage() {
               <thead>
                 <tr className="border-b border-line text-xs tracking-widest whitespace-nowrap text-ink-muted uppercase">
                   <th scope="col" className="px-4 py-3 font-normal">Месяц</th>
-                  <th scope="col" className="w-2/5 px-4 py-3 font-normal">Доля</th>
+                  <th scope="col" className="w-1/4 px-4 py-3 font-normal">Доля</th>
                   <th scope="col" className="px-4 py-3 text-right font-normal">Заказов</th>
                   <th scope="col" className="px-4 py-3 text-right font-normal">Приход</th>
+                  <th scope="col" className="px-4 py-3 text-right font-normal">Себестоимость</th>
+                  <th scope="col" className="px-4 py-3 text-right font-normal">Прибыль</th>
                 </tr>
               </thead>
 
@@ -49,6 +52,14 @@ export default async function CashflowPage() {
                     <td className="px-4 py-4 text-right whitespace-nowrap tabular-nums">
                       {formatPrice(month.revenue)}
                     </td>
+
+                    <td className="px-4 py-4 text-right whitespace-nowrap text-ink-muted tabular-nums">
+                      {formatPrice(month.cost)}
+                    </td>
+
+                    <td className="px-4 py-4 text-right whitespace-nowrap tabular-nums">
+                      {formatPrice(month.profit)}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -56,7 +67,8 @@ export default async function CashflowPage() {
           </div>
 
           <p className="mt-4 text-xs text-ink-muted">
-            Всего за период: {formatPrice(total)}. Считаем только подтверждённые заказы.
+            Всего за период: {formatPrice(revenue)}, прибыль {formatPrice(profit)}. Считаем только
+            подтверждённые заказы.
           </p>
         </>
       )}

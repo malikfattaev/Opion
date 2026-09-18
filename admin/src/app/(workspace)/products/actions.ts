@@ -15,6 +15,7 @@ export async function saveProduct(_state: ProductFormState, formData: FormData):
   const id = readText(formData, "id");
   const price = readPrice(formData, "price");
   const comparePrice = readPrice(formData, "comparePrice");
+  const costPrice = readPrice(formData, "costPrice");
 
   if (price.kind !== "number") {
     return { message: "Укажите цену числом." };
@@ -22,6 +23,10 @@ export async function saveProduct(_state: ProductFormState, formData: FormData):
 
   if (comparePrice.kind === "invalid") {
     return { message: "Старая цена должна быть числом." };
+  }
+
+  if (costPrice.kind === "invalid") {
+    return { message: "Себестоимость должна быть числом." };
   }
 
   const sizes = readList(formData, "sizes");
@@ -43,6 +48,7 @@ export async function saveProduct(_state: ProductFormState, formData: FormData):
     description: readText(formData, "description"),
     price: price.value,
     comparePrice: comparePrice.kind === "number" ? comparePrice.value : null,
+    costPrice: costPrice.kind === "number" ? costPrice.value : null,
     typeSlug,
     styleSlugs: formData.getAll("styleSlugs").map(String),
     sizes,

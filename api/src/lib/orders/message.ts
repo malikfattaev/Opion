@@ -8,6 +8,8 @@ export type ResolvedOrderLine = {
   productSlug: string;
   sku: string;
   name: string;
+  /** Себестоимость позиции. В подпись не идёт: она нужна отчётам, а не группе. */
+  unitCost: number;
   size: string;
   quantity: number;
   unitPrice: number;

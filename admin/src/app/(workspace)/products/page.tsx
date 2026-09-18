@@ -104,6 +104,9 @@ export default async function ProductsPage() {
                         {formatNumber(product.comparePrice)}
                       </p>
                     )}
+                    {product.costPrice === null ? null : (
+                      <p className="mt-1 text-xs text-ink-muted">с/с {formatNumber(product.costPrice)}</p>
+                    )}
                   </td>
 
                   <td className="px-4 py-4">
