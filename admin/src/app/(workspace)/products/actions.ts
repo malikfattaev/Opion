@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { createProduct, deleteProduct, updateProduct, type ProductInput } from "@/lib/api/catalog";
+import { createProduct, deleteProduct, updateProduct, uploadImage, type ProductInput } from "@/lib/api/catalog";
 
 export type ProductFormState = { message: string | null };
 
@@ -46,7 +46,11 @@ export async function saveProduct(_state: ProductFormState, formData: FormData):
     typeSlug,
     styleSlugs: formData.getAll("styleSlugs").map(String),
     sizes,
-    images: readList(formData, "images").map((url) => ({ url, alt: readText(formData, "name") })),
+    images: formData
+      .getAll("images")
+      .map(String)
+      .filter(Boolean)
+      .map((url) => ({ url, alt: readText(formData, "name") })),
     isPublished: formData.get("isPublished") === "on",
   };
 
@@ -58,6 +62,21 @@ export async function saveProduct(_state: ProductFormState, formData: FormData):
 
   revalidatePath("/products");
   redirect("/products");
+}
+
+export type UploadResult = { ok: true; url: string } | { ok: false; message: string };
+
+/** Фото уходит в API, а оттуда в бакет. Браузер к хранилищу не ходит. */
+export async function uploadProductImage(formData: FormData): Promise<UploadResult> {
+  const file = formData.get("file");
+
+  if (!(file instanceof File) || file.size === 0) {
+    return { ok: false, message: "Выберите файл." };
+  }
+
+  const result = await uploadImage(file);
+
+  return result.ok ? { ok: true, url: result.data.url } : { ok: false, message: result.message };
 }
 
 export async function removeProduct(_state: ProductFormState, formData: FormData): Promise<ProductFormState> {
@@ -97,7 +116,7 @@ function readPrice(formData: FormData, name: string): Price {
   return Number.isInteger(value) && value >= 0 ? { kind: "number", value } : { kind: "invalid" };
 }
 
-/** Размеры и ссылки на фото вводятся по одному в строке. */
+/** Размеры вводятся по одному в строке. */
 function readList(formData: FormData, name: string): string[] {
   return readText(formData, name)
     .split(/[\n,]/)

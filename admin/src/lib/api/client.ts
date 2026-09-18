@@ -78,6 +78,48 @@ export async function apiRequest<T>(
   return parsed.success ? { ok: true, data: parsed.data } : { ok: false, message: "API ответил неожиданно." };
 }
 
+/**
+ * Отправка файла. Заголовок содержимого не ставим руками: границу
+ * multipart за нас проставит сам fetch.
+ */
+export async function apiUpload<T>(path: string, schema: ZodType<T>, file: File): Promise<ApiResult<T>> {
+  const token = await sessionToken();
+
+  if (!token) {
+    redirect("/login");
+  }
+
+  const body = new FormData();
+  body.set("file", file);
+
+  let response: Response;
+
+  try {
+    response = await fetch(`${apiUrl()}${path}`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body,
+      cache: "no-store",
+    });
+  } catch {
+    return { ok: false, message: "Сервис недоступен. Попробуйте ещё раз." };
+  }
+
+  if (response.status === 401) {
+    redirect("/login");
+  }
+
+  const payload: unknown = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    return { ok: false, message: readMessage(payload) ?? "Не получилось загрузить файл." };
+  }
+
+  const parsed = schema.safeParse(payload);
+
+  return parsed.success ? { ok: true, data: parsed.data } : { ok: false, message: "API ответил неожиданно." };
+}
+
 function readMessage(payload: unknown): string | null {
   if (typeof payload !== "object" || payload === null) {
     return null;

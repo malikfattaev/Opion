@@ -26,6 +26,13 @@ const serverEnvSchema = z.object({
   /** Секрет, которым Telegram подписывает вызовы вебхука. Задаётся в setWebhook. */
   TELEGRAM_WEBHOOK_SECRET: z.string().min(16).optional(),
 
+  /** Хранилище картинок: бакет Railway по протоколу S3. */
+  BUCKET_NAME: z.string().min(1).optional(),
+  BUCKET_ENDPOINT: z.url().optional(),
+  BUCKET_REGION: z.string().min(1).default("auto"),
+  BUCKET_ACCESS_KEY_ID: z.string().min(1).optional(),
+  BUCKET_SECRET_ACCESS_KEY: z.string().min(1).optional(),
+
   /** Реквизиты для перевода, которые видит покупатель. */
   PAYMENT_CARD_NUMBER: z.string().min(1).optional(),
   PAYMENT_CARD_HOLDER: z.string().min(1).optional(),
@@ -68,4 +75,34 @@ export function allowedOrigins(): string[] {
     .ALLOWED_ORIGINS.split(",")
     .map((origin) => origin.trim().replace(/\/+$/, ""))
     .filter(Boolean);
+}
+
+export type BucketConfig = {
+  name: string;
+  endpoint: string;
+  region: string;
+  accessKeyId: string;
+  secretAccessKey: string;
+};
+
+/** Бакет настроен не везде: без него админка просто не даёт загружать фото. */
+export function bucketConfig(): BucketConfig | null {
+  const env = serverEnv();
+
+  if (
+    !env.BUCKET_NAME ||
+    !env.BUCKET_ENDPOINT ||
+    !env.BUCKET_ACCESS_KEY_ID ||
+    !env.BUCKET_SECRET_ACCESS_KEY
+  ) {
+    return null;
+  }
+
+  return {
+    name: env.BUCKET_NAME,
+    endpoint: env.BUCKET_ENDPOINT,
+    region: env.BUCKET_REGION,
+    accessKeyId: env.BUCKET_ACCESS_KEY_ID,
+    secretAccessKey: env.BUCKET_SECRET_ACCESS_KEY,
+  };
 }

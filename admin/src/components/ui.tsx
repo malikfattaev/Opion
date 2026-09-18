@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { ChevronDownIcon } from "@/components/icons";
+
 /** Мелкие кирпичики интерфейса: одинаковые поля, кнопки и карточки во всех разделах. */
 
 export function Field({
@@ -31,6 +33,20 @@ export function PageHeader({ title, action }: { title: string; action?: React.Re
 
       {action ? <div className="shrink-0">{action}</div> : null}
     </div>
+  );
+}
+
+/**
+ * Выпадающий список. Системную стрелку убираем: в тёмной теме она чужая
+ * и жмётся к самому краю поля.
+ */
+export function Select({ className = "", ...props }: React.SelectHTMLAttributes<HTMLSelectElement>) {
+  return (
+    <span className="relative block">
+      <select {...props} className={`${inputClassName} appearance-none pr-11 ${className}`} />
+
+      <ChevronDownIcon className="pointer-events-none absolute top-1/2 right-4 size-4 -translate-y-1/2 text-ink-muted" />
+    </span>
   );
 }
 

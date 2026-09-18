@@ -1,6 +1,7 @@
 import "server-only";
 
 import { db } from "@/lib/db";
+import { forgetProductImages } from "@/lib/storage/images";
 
 import { uniqueViolationField } from "./respond";
 import type { ProductCreate, ProductUpdate } from "./schema";
@@ -107,6 +108,8 @@ export async function updateProduct(id: string, input: ProductUpdate): Promise<A
 
   // Стили и фото заменяются целиком: форма всегда присылает итоговый список,
   // и так не остаётся записей, про которые никто не помнит.
+  const dropped = input.images === undefined ? [] : await droppedImages(id, input.images);
+
   const row = await db.product.update({
     where: { id },
     data: {
@@ -135,13 +138,42 @@ export async function updateProduct(id: string, input: ProductUpdate): Promise<A
     select: SELECTION,
   });
 
+  await forget(dropped);
+
   return toAdminProduct(row);
 }
 
 export async function deleteProduct(id: string): Promise<boolean> {
+  const images = await db.productImage.findMany({ where: { productId: id }, select: { url: true } });
   const { count } = await db.product.deleteMany({ where: { id } });
 
-  return count > 0;
+  if (count === 0) {
+    return false;
+  }
+
+  await forget(images.map(({ url }) => url));
+
+  return true;
+}
+
+/** Какие файлы карточка перестала показывать после правки. */
+async function droppedImages(id: string, next: readonly { url: string }[]): Promise<string[]> {
+  const current = await db.productImage.findMany({ where: { productId: id }, select: { url: true } });
+  const kept = new Set(next.map((image) => image.url));
+
+  return current.map(({ url }) => url).filter((url) => !kept.has(url));
+}
+
+/**
+ * Уборка в хранилище идёт после записи в базу и не должна её ронять:
+ * забытый файл - это копейки за хранение, а упавшее сохранение - потерянная правка.
+ */
+async function forget(urls: readonly string[]): Promise<void> {
+  try {
+    await forgetProductImages(urls);
+  } catch (error) {
+    console.error("Админка: не удалось убрать файлы из хранилища", error);
+  }
 }
 
 async function resolveTypeId(slug: string): Promise<string> {

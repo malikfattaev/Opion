@@ -3,7 +3,8 @@
 import { useActionState } from "react";
 
 import { saveProduct, type ProductFormState } from "@/app/(workspace)/products/actions";
-import { ErrorText, Field, GhostLink, inputClassName, PrimaryButton } from "@/components/ui";
+import { ImageUploader } from "@/components/image-uploader";
+import { ErrorText, Field, GhostLink, inputClassName, PrimaryButton, Select } from "@/components/ui";
 import { adminConfig } from "@/config/site";
 import type { AdminOption, AdminProduct } from "@/lib/api/catalog";
 
@@ -94,20 +95,14 @@ export function ProductForm({
           />
         </Field>
 
-        <Field label="Фото" hint="ссылки, по одной в строке">
-          <textarea
-            name="images"
-            defaultValue={product?.images.map((image) => image.url).join("\n")}
-            rows={3}
-            placeholder="https://..."
-            className={`${inputClassName} resize-y`}
-          />
+        <Field label="Фото">
+          <ImageUploader images={product?.images} />
         </Field>
       </div>
 
       <div className="flex h-fit flex-col gap-6 rounded-2xl border border-line p-6">
         <Field label="Тип">
-          <select name="typeSlug" defaultValue={product?.typeSlug ?? ""} required className={inputClassName}>
+          <Select name="typeSlug" defaultValue={product?.typeSlug ?? ""} required>
             <option value="" disabled>
               Выберите тип
             </option>
@@ -116,7 +111,7 @@ export function ProductForm({
                 {type.name}
               </option>
             ))}
-          </select>
+          </Select>
         </Field>
 
         <fieldset>
