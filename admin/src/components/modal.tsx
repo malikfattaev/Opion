@@ -11,13 +11,11 @@ import { CloseIcon } from "@/components/icons";
 export function Modal({
   open,
   title,
-  description,
   onClose,
   children,
 }: {
   open: boolean;
   title: string;
-  description?: string;
   onClose: () => void;
   children: React.ReactNode;
 }) {
@@ -51,11 +49,8 @@ export function Modal({
       }}
       className="fixed inset-0 m-auto h-fit max-h-[calc(100dvh-3rem)] w-[min(34rem,calc(100vw-2rem))] overflow-y-auto rounded-2xl border border-line bg-canvas p-0 text-ink backdrop:bg-black/70"
     >
-      <div className="flex items-start justify-between gap-6 border-b border-line px-6 py-5">
-        <div>
-          <h2 className="font-display text-2xl leading-tight">{title}</h2>
-          {description ? <p className="mt-1.5 text-sm text-ink-muted">{description}</p> : null}
-        </div>
+      <div className="flex items-center justify-between gap-6 border-b border-line px-6 py-5">
+        <h2 className="font-display text-2xl leading-tight">{title}</h2>
 
         <button
           type="button"

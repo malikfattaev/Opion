@@ -30,7 +30,7 @@ export function ProductForm({
         </Field>
 
         <div className="grid gap-6 sm:grid-cols-2">
-          <Field label="Артикул" hint="по нему узнаём вещь в заказе">
+          <Field label="Артикул">
             <input
               name="sku"
               defaultValue={product?.sku}
@@ -40,7 +40,7 @@ export function ProductForm({
             />
           </Field>
 
-          <Field label="Адрес" hint="латиницей, попадёт в ссылку">
+          <Field label="Адрес" hint="латиницей">
             <input
               name="slug"
               defaultValue={product?.slug}

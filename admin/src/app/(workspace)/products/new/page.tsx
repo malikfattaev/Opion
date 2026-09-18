@@ -11,7 +11,7 @@ export default async function NewProductPage() {
 
   return (
     <>
-      <PageHeader title="Новая вещь" description="Заполните карточку: её увидят на сайте и в мини-аппе." />
+      <PageHeader title="Новая вещь" />
       <ProductForm types={types} styles={styles} />
     </>
   );

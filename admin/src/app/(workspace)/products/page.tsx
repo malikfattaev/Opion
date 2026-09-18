@@ -26,8 +26,6 @@ export default async function ProductsPage() {
     <>
       <PageHeader
         title="Товары"
-        description="Всё, что видят покупатели на сайте и в мини-аппе."
-        meta={countLabel(products.length)}
         action={
           <Link
             href="/products/new"
@@ -40,7 +38,7 @@ export default async function ProductsPage() {
       />
 
       {products.length === 0 ? (
-        <EmptyState>Каталог пуст. Добавьте первую вещь.</EmptyState>
+        <EmptyState>Пока пусто.</EmptyState>
       ) : (
         <div className="mt-8 overflow-x-auto rounded-2xl border border-line">
           <table className="w-full min-w-2xl text-left text-sm">
@@ -160,12 +158,4 @@ function ShelfBadge({ isPublished }: { isPublished: boolean }) {
       {isPublished ? "на витрине" : "скрыта"}
     </span>
   );
-}
-
-/** «1 вещь», «2 вещи», «5 вещей»: русские окончания руками, Intl их не знает. */
-function countLabel(count: number): string {
-  const rules = new Intl.PluralRules(adminConfig.locale).select(count);
-  const word = rules === "one" ? "вещь" : rules === "few" ? "вещи" : "вещей";
-
-  return `${count} ${word}`;
 }

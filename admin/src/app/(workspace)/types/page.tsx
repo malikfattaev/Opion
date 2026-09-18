@@ -9,10 +9,6 @@ export default async function TypesPage() {
   const options = await listOptions("types");
 
   return (
-    <OptionsManager
-      kind="types"
-      description="Худи, джинсы, футболка. У каждой вещи ровно один тип, по нему покупатель фильтрует витрину."
-      options={options}
-    />
+    <OptionsManager kind="types" options={options} />
   );
 }

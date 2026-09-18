@@ -25,7 +25,7 @@ export default async function EditProductPage({ params }: PageProps<"/products/[
 
   return (
     <>
-      <PageHeader title={product.name} description={`Артикул ${product.sku}`} />
+      <PageHeader title={product.name} />
       <ProductForm product={product} types={types} styles={styles} />
     </>
   );

@@ -18,15 +18,7 @@ type Editing = { option?: AdminOption } | null;
  * Список типов или стилей. Раздел один и тот же по устройству, поэтому
  * отличается только подписями и адресом API.
  */
-export function OptionsManager({
-  kind,
-  description,
-  options,
-}: {
-  kind: OptionKind;
-  description: string;
-  options: readonly AdminOption[];
-}) {
+export function OptionsManager({ kind, options }: { kind: OptionKind; options: readonly AdminOption[] }) {
   const [editing, setEditing] = useState<Editing>(null);
   const titles = optionSections[kind];
 
@@ -34,8 +26,6 @@ export function OptionsManager({
     <>
       <PageHeader
         title={titles.plural}
-        description={description}
-        meta={countLabel(options.length)}
         action={
           <button
             type="button"
@@ -49,7 +39,7 @@ export function OptionsManager({
       />
 
       {options.length === 0 ? (
-        <EmptyState>{titles.empty}</EmptyState>
+        <EmptyState>Пока пусто.</EmptyState>
       ) : (
         <div className="mt-8 overflow-x-auto rounded-2xl border border-line">
           <table className="w-full min-w-xl text-left text-sm">
@@ -108,7 +98,6 @@ export function OptionsManager({
       <Modal
         open={editing !== null}
         title={editing?.option ? titles.edit : titles.create}
-        description="Название видят покупатели, адрес попадает в ссылку фильтра."
         onClose={() => setEditing(null)}
       >
         {editing === null ? null : (
@@ -160,7 +149,7 @@ function OptionForm({
         <input name="name" defaultValue={option?.name} required autoFocus className={inputClassName} />
       </Field>
 
-      <Field label="Адрес" hint="латиницей, попадёт в ссылку">
+      <Field label="Адрес" hint="латиницей">
         <input
           name="slug"
           defaultValue={option?.slug}
@@ -213,12 +202,4 @@ function RemoveOption({ kind, option }: { kind: OptionKind; option: AdminOption 
       </button>
     </form>
   );
-}
-
-/** «1 раздел», «2 раздела», «5 разделов»: русские окончания руками. */
-function countLabel(count: number): string {
-  const rule = new Intl.PluralRules("ru").select(count);
-  const word = rule === "one" ? "раздел" : rule === "few" ? "раздела" : "разделов";
-
-  return `${count} ${word}`;
 }

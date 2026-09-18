@@ -49,20 +49,18 @@ export type OptionKind = "types" | "styles";
 /** Подписи разделов пишем целиком: так не приходится склонять слова в коде. */
 export const optionSections: Record<
   OptionKind,
-  { plural: string; add: string; create: string; edit: string; empty: string }
+  { plural: string; add: string; create: string; edit: string }
 > = {
   types: {
     plural: "Типы",
     add: "Добавить тип",
     create: "Новый тип",
     edit: "Изменить тип",
-    empty: "Типов пока нет. Добавьте первый.",
   },
   styles: {
     plural: "Стили",
     add: "Добавить стиль",
     create: "Новый стиль",
     edit: "Изменить стиль",
-    empty: "Стилей пока нет. Добавьте первый.",
   },
 };

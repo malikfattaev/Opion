@@ -9,10 +9,6 @@ export default async function StylesPage() {
   const options = await listOptions("styles");
 
   return (
-    <OptionsManager
-      kind="styles"
-      description="Y2K, Индислиз, Лузер-кор, Archive. Вещь может попадать сразу в несколько стилей."
-      options={options}
-    />
+    <OptionsManager kind="styles" options={options} />
   );
 }

@@ -21,7 +21,6 @@ export default function LoginPage() {
         />
 
         <h1 className="mt-10 text-center font-display text-3xl leading-tight">Админка</h1>
-        <p className="mt-2 text-center text-sm text-ink-muted">Вход по логину и паролю из раздела «Команда».</p>
 
         <LoginForm />
       </div>
