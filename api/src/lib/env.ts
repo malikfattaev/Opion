@@ -34,6 +34,9 @@ const serverEnvSchema = z.object({
   /** Домен, который Railway выдаёт сервису. Подставляется платформой. */
   RAILWAY_PUBLIC_DOMAIN: z.string().min(1).optional(),
 
+  /** Адрес мини-аппа: по нему бот даёт кнопку «Открыть каталог» в ответ на /start. */
+  MINI_APP_URL: z.url().optional(),
+
   /** Хранилище картинок: бакет Railway по протоколу S3. */
   BUCKET_NAME: z.string().min(1).optional(),
   BUCKET_ENDPOINT: z.url().optional(),

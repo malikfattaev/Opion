@@ -6,10 +6,17 @@ import { decideOrder, orderNumber } from "@/lib/orders/repository";
 import { statusLabel } from "@/lib/orders/status";
 import { WEBHOOK_SECRET_HEADER } from "@/lib/telegram/headers";
 import { answerCallback, isOrdersChatAdmin, ORDER_ACTIONS, updateOrderMessage } from "@/lib/telegram/orders";
+import { sendWelcome } from "@/lib/telegram/welcome";
 
 export const dynamic = "force-dynamic";
 
 const updateSchema = z.object({
+  message: z
+    .object({
+      chat: z.object({ id: z.number().int(), type: z.string() }),
+      text: z.string().optional(),
+    })
+    .optional(),
   callback_query: z
     .object({
       id: z.string(),
@@ -31,8 +38,9 @@ const DECISIONS = {
 } as const;
 
 /**
- * Кнопки «Подтвердить» и «Отклонить» под заказом в группе основателей.
- * Telegram подписывает вызов секретом, который мы задали в setWebhook.
+ * Всё, что приходит от Telegram: /start в личке и кнопки «Подтвердить»
+ * и «Отклонить» под заказом в группе основателей. Вызов подписан секретом,
+ * который мы задали в setWebhook.
  */
 export async function POST(request: Request) {
   const { TELEGRAM_WEBHOOK_SECRET } = serverEnv();
@@ -42,7 +50,19 @@ export async function POST(request: Request) {
   }
 
   const parsed = updateSchema.safeParse(await request.json().catch(() => null));
-  const callback = parsed.success ? parsed.data.callback_query : undefined;
+  const update = parsed.success ? parsed.data : undefined;
+  const callback = update?.callback_query;
+
+  // В группе заказов бот молчит: там он только присылает заказы.
+  if (update?.message?.chat.type === "private" && isStart(update.message.text)) {
+    const sent = await sendWelcome(update.message.chat.id);
+
+    if (!sent.ok) {
+      console.error("Не удалось ответить на /start:", sent.reason);
+    }
+
+    return Response.json({ ok: true });
+  }
 
   // Telegram повторяет доставку, пока не получит 200, поэтому на всё,
   // что мы не умеем обрабатывать, отвечаем спокойным успехом.
@@ -84,6 +104,11 @@ export async function POST(request: Request) {
   await answerCallback(callback.id, `${orderNumber(order)}: ${statusLabel(order.status)}`);
 
   return Response.json({ ok: true });
+}
+
+/** Команда приходит как «/start», «/start код» или «/start@opion_bot». */
+function isStart(text: string | undefined): boolean {
+  return (text ?? "").trim().split(/\s+/)[0]?.split("@")[0] === "/start";
 }
 
 function readDecision(data: string): { status: OrderStatus; orderId: string } | null {
