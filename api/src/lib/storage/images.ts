@@ -44,14 +44,17 @@ function bucket(): { client: S3Client; name: string } {
   return { client, name: config.name };
 }
 
+/** Что получилось из загруженного файла: ключ в бакете и размеры готовой картинки. */
+export type StoredUpload = { key: string; width: number; height: number; bytes: number };
+
 /**
- * Кладёт фотографию в бакет и возвращает её ключ. Всё приводится к webp:
- * так картинка весит в разы меньше, а формат понимают все браузеры.
+ * Кладёт фотографию в бакет. Всё приводится к webp: так картинка весит
+ * в разы меньше, а формат понимают все браузеры.
  */
-export async function storeProductImage(file: File): Promise<string> {
+export async function storeProductImage(file: File): Promise<StoredUpload> {
   const source = Buffer.from(await file.arrayBuffer());
 
-  let webp: Buffer;
+  let webp: { data: Buffer; info: { width: number; height: number; size: number } };
 
   try {
     webp = await sharp(source)
@@ -59,7 +62,7 @@ export async function storeProductImage(file: File): Promise<string> {
       .rotate()
       .resize({ width: MAX_SIDE, height: MAX_SIDE, fit: "inside", withoutEnlargement: true })
       .webp({ quality: WEBP_QUALITY })
-      .toBuffer();
+      .toBuffer({ resolveWithObject: true });
   } catch {
     throw new BrokenImageError("Не получилось прочитать изображение.");
   }
@@ -68,10 +71,10 @@ export async function storeProductImage(file: File): Promise<string> {
   const { client: s3, name } = bucket();
 
   await s3.send(
-    new PutObjectCommand({ Bucket: name, Key: key, Body: webp, ContentType: CONTENT_TYPE }),
+    new PutObjectCommand({ Bucket: name, Key: key, Body: webp.data, ContentType: CONTENT_TYPE }),
   );
 
-  return key;
+  return { key, width: webp.info.width, height: webp.info.height, bytes: webp.info.size };
 }
 
 export type StoredImage = { body: ReadableStream; contentType: string; length?: number };
@@ -136,6 +139,11 @@ export function toPublicImageUrl(url: string): string {
   const origin = publicApiOrigin();
 
   return origin ? `${origin}${path}` : path;
+}
+
+/** Путь, под которым картинка хранится у нас: `/images/products/ab12.webp`. */
+export function toImagePath(key: string): string {
+  return `${PUBLIC_PREFIX}${key}`;
 }
 
 /** Путь нашей картинки, если ссылка вообще про неё. Чужие адреса не трогаем. */

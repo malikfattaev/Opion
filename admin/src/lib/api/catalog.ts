@@ -4,7 +4,7 @@ import { z } from "zod";
 
 import type { OptionKind } from "@/config/site";
 
-import { apiRead, apiRequest, apiUpload, type ApiResult } from "./client";
+import { apiRead, apiRequest, type ApiResult } from "./client";
 
 /** Формы ответов API. Совпадают с тем, что отдаёт сервис, и проверяются на входе. */
 
@@ -101,9 +101,3 @@ export async function deleteProduct(id: string): Promise<ApiResult<undefined>> {
   return apiRequest(`/admin/products/${id}`, emptySchema, { method: "DELETE" });
 }
 
-const uploadedImageSchema = z.object({ url: z.url() });
-
-/** Загружает фотографию товара. API сам сожмёт её и вернёт ссылку. */
-export async function uploadImage(file: File): Promise<ApiResult<{ url: string }>> {
-  return apiUpload("/admin/images", uploadedImageSchema, file);
-}

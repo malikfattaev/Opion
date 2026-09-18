@@ -2,20 +2,28 @@
 
 import { useRef, useState } from "react";
 
-import { uploadProductImage } from "@/app/(workspace)/products/actions";
-import { CloseIcon, PlusIcon } from "@/components/icons";
+import { uploadMediaFile } from "@/app/(workspace)/media/actions";
+import { CloseIcon, ImageIcon, PlusIcon } from "@/components/icons";
+import { MediaPicker } from "@/components/media-picker";
 import { ErrorText } from "@/components/ui";
 
 /**
- * Фотографии вещи. Файл уходит в API, тот сжимает его в webp и кладёт
- * в хранилище, а сюда возвращается готовая ссылка. В форму ссылки
- * попадают скрытыми полями, поэтому сохранять их умеет то же действие.
+ * Фотографии вещи. Файл уходит в API, тот сжимает его в webp, кладёт
+ * в хранилище и заводит карточку в разделе «Медиа», откуда то же фото
+ * можно взять для другой вещи. В форму ссылки попадают скрытыми полями,
+ * поэтому сохранять их умеет то же действие.
  */
 export function ImageUploader({ images = [] }: { images?: readonly { url: string }[] }) {
   const [urls, setUrls] = useState<string[]>(() => images.map((image) => image.url));
   const [isUploading, setUploading] = useState(false);
+  const [isPicking, setPicking] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const picker = useRef<HTMLInputElement>(null);
+
+  /** Одно и то же фото в карточке дважды не нужно. */
+  function append(added: readonly string[]) {
+    setUrls((current) => [...current, ...added.filter((url) => !current.includes(url))]);
+  }
 
   async function add(files: FileList | null) {
     if (!files || files.length === 0) {
@@ -31,14 +39,14 @@ export function ImageUploader({ images = [] }: { images?: readonly { url: string
       data.set("file", file);
 
       try {
-        const result = await uploadProductImage(data);
+        const result = await uploadMediaFile(data);
 
         if (!result.ok) {
           setMessage(result.message);
           break;
         }
 
-        setUrls((current) => [...current, result.url]);
+        append([result.file.url]);
       } catch {
         // Сюда попадаем, например, когда файл не пролез по размеру.
         setMessage(`Не получилось загрузить «${file.name}».`);
@@ -82,15 +90,15 @@ export function ImageUploader({ images = [] }: { images?: readonly { url: string
           </figure>
         ))}
 
-        <button
-          type="button"
-          onClick={() => picker.current?.click()}
-          disabled={isUploading}
-          className="flex size-28 flex-col items-center justify-center gap-1.5 rounded-xl border border-dashed border-line text-xs text-ink-muted transition-colors hover:border-ink-muted hover:text-ink disabled:opacity-40"
-        >
+        <Tile onClick={() => picker.current?.click()} disabled={isUploading}>
           <PlusIcon className="size-5" />
-          {isUploading ? "Грузим…" : "Добавить"}
-        </button>
+          {isUploading ? "Грузим…" : "Загрузить"}
+        </Tile>
+
+        <Tile onClick={() => setPicking(true)}>
+          <ImageIcon className="size-5" />
+          Из медиа
+        </Tile>
       </div>
 
       <input
@@ -105,6 +113,23 @@ export function ImageUploader({ images = [] }: { images?: readonly { url: string
       <div className="mt-3">
         <ErrorText>{message}</ErrorText>
       </div>
+
+      <MediaPicker open={isPicking} chosen={urls} onClose={() => setPicking(false)} onPick={append} />
     </div>
+  );
+}
+
+function Tile({
+  children,
+  ...props
+}: React.ButtonHTMLAttributes<HTMLButtonElement>) {
+  return (
+    <button
+      {...props}
+      type="button"
+      className="flex size-28 flex-col items-center justify-center gap-1.5 rounded-xl border border-dashed border-line text-xs text-ink-muted transition-colors hover:border-ink-muted hover:text-ink disabled:opacity-40"
+    >
+      {children}
+    </button>
   );
 }

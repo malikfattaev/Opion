@@ -4,6 +4,12 @@ import { useEffect, useRef } from "react";
 
 import { CloseIcon } from "@/components/icons";
 
+/** Ширины пишем целиком: Tailwind собирает классы по тексту исходника. */
+const WIDTHS = {
+  form: "w-[min(34rem,calc(100vw-2rem))]",
+  wide: "w-[min(56rem,calc(100vw-2rem))]",
+} as const;
+
 /**
  * Окно поверх страницы. Внутри нативный <dialog>: он сам уводит фокус внутрь,
  * закрывается по Escape и рисует затемнение, поэтому руками это не повторяем.
@@ -11,11 +17,14 @@ import { CloseIcon } from "@/components/icons";
 export function Modal({
   open,
   title,
+  size = "form",
   onClose,
   children,
 }: {
   open: boolean;
   title: string;
+  /** Форме хватает колонки, галерее нужна вся ширина экрана. */
+  size?: "form" | "wide";
   onClose: () => void;
   children: React.ReactNode;
 }) {
@@ -47,7 +56,7 @@ export function Modal({
           onClose();
         }
       }}
-      className="fixed inset-0 m-auto h-fit max-h-[calc(100dvh-3rem)] w-[min(34rem,calc(100vw-2rem))] overflow-y-auto rounded-2xl border border-line bg-canvas p-0 text-ink backdrop:bg-black/70"
+      className={`fixed inset-0 m-auto h-fit max-h-[calc(100dvh-3rem)] overflow-y-auto rounded-2xl border border-line bg-canvas p-0 text-ink backdrop:bg-black/70 ${WIDTHS[size]}`}
     >
       <div className="flex items-center justify-between gap-6 border-b border-line px-6 py-5">
         <h2 className="font-display text-2xl leading-tight">{title}</h2>

@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { createProduct, deleteProduct, updateProduct, uploadImage, type ProductInput } from "@/lib/api/catalog";
+import { createProduct, deleteProduct, updateProduct, type ProductInput } from "@/lib/api/catalog";
 
 export type ProductFormState = { message: string | null };
 
@@ -68,21 +68,6 @@ export async function saveProduct(_state: ProductFormState, formData: FormData):
 
   revalidatePath("/products");
   redirect("/products");
-}
-
-export type UploadResult = { ok: true; url: string } | { ok: false; message: string };
-
-/** Фото уходит в API, а оттуда в бакет. Браузер к хранилищу не ходит. */
-export async function uploadProductImage(formData: FormData): Promise<UploadResult> {
-  const file = formData.get("file");
-
-  if (!(file instanceof File) || file.size === 0) {
-    return { ok: false, message: "Выберите файл." };
-  }
-
-  const result = await uploadImage(file);
-
-  return result.ok ? { ok: true, url: result.data.url } : { ok: false, message: result.message };
 }
 
 export async function removeProduct(_state: ProductFormState, formData: FormData): Promise<ProductFormState> {

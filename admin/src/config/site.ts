@@ -13,7 +13,7 @@ export const adminConfig = {
 } as const;
 
 /** Ключ картинки раздела: сами иконки живут в компонентах, конфиг остаётся без JSX. */
-export type NavigationIcon = "gauge" | "tag" | "layers" | "spark" | "wallet" | "chart" | "users";
+export type NavigationIcon = "gauge" | "tag" | "layers" | "spark" | "image" | "wallet" | "chart" | "users";
 
 export type NavigationItem = {
   href: string;
@@ -39,6 +39,7 @@ export const adminNavigation: readonly NavigationGroup[] = [
       { href: "/products", label: "Товары", icon: "tag" },
       { href: "/types", label: "Типы", icon: "layers" },
       { href: "/styles", label: "Стили", icon: "spark" },
+      { href: "/media", label: "Медиа", icon: "image" },
     ],
   },
   {
@@ -80,3 +81,18 @@ export const optionSections: Record<
     edit: "Изменить стиль",
   },
 };
+
+/** Порядок в галерее медиа. Те же значения понимает API. */
+export const mediaSorts = [
+  { value: "new", label: "Сначала новые" },
+  { value: "old", label: "Сначала старые" },
+  { value: "large", label: "Сначала тяжёлые" },
+  { value: "name", label: "По названию" },
+] as const;
+
+export type MediaSort = (typeof mediaSorts)[number]["value"];
+
+/** Чужое значение из адреса страницы не должно ломать запрос. */
+export function mediaSort(value: string | undefined): MediaSort {
+  return mediaSorts.find((sort) => sort.value === value)?.value ?? "new";
+}

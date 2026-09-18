@@ -3,7 +3,16 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { ChartIcon, GaugeIcon, LayersIcon, SparkIcon, TagIcon, UsersIcon, WalletIcon } from "@/components/icons";
+import {
+  ChartIcon,
+  GaugeIcon,
+  ImageIcon,
+  LayersIcon,
+  SparkIcon,
+  TagIcon,
+  UsersIcon,
+  WalletIcon,
+} from "@/components/icons";
 import type { NavigationItem, NavigationIcon } from "@/config/site";
 
 /** Картинки лежат рядом с ссылкой: через границу сервер-клиент компоненты не передать. */
@@ -12,6 +21,7 @@ const ICONS: Record<NavigationIcon, (props: { className?: string }) => React.Rea
   tag: TagIcon,
   layers: LayersIcon,
   spark: SparkIcon,
+  image: ImageIcon,
   wallet: WalletIcon,
   chart: ChartIcon,
   users: UsersIcon,

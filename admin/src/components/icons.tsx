@@ -134,3 +134,40 @@ export function PlusIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+export function ImageIcon({ className }: IconProps) {
+  return (
+    <svg {...BASE} className={className}>
+      <rect x="3" y="4" width="18" height="16" rx="2" />
+      <circle cx="8.5" cy="9.5" r="1.5" />
+      <path d="m4 17 4.5-4.5a1.5 1.5 0 0 1 2.1 0L15 17" />
+      <path d="m13.5 15 2-2a1.5 1.5 0 0 1 2.1 0L20 15.5" />
+    </svg>
+  );
+}
+
+export function SearchIcon({ className }: IconProps) {
+  return (
+    <svg {...BASE} className={className}>
+      <circle cx="11" cy="11" r="6.5" />
+      <path d="m16 16 4 4" />
+    </svg>
+  );
+}
+
+export function CopyIcon({ className }: IconProps) {
+  return (
+    <svg {...BASE} className={className}>
+      <rect x="9" y="9" width="11" height="11" rx="2" />
+      <path d="M15 5.5A1.5 1.5 0 0 0 13.5 4H6a2 2 0 0 0-2 2v7.5A1.5 1.5 0 0 0 5.5 15" />
+    </svg>
+  );
+}
+
+export function CheckIcon({ className }: IconProps) {
+  return (
+    <svg {...BASE} className={className}>
+      <path d="m5 12.5 4.5 4.5L19 7" />
+    </svg>
+  );
+}

@@ -1,16 +1,25 @@
+import { addMedia, listMedia, mediaSort } from "@/lib/admin/media";
 import { fail, ok } from "@/lib/admin/respond";
 import { requireMember } from "@/lib/auth/guard";
-import {
-  BrokenImageError,
-  BucketNotConfiguredError,
-  MAX_IMAGE_BYTES,
-  storeProductImage,
-  toPublicImageUrl,
-} from "@/lib/storage/images";
+import { BrokenImageError, BucketNotConfiguredError, MAX_IMAGE_BYTES } from "@/lib/storage/images";
 
 export const dynamic = "force-dynamic";
 
-/** Загрузка фотографии товара из админки. Ответ - готовая ссылка для карточки. */
+/** Галерея загруженных файлов: и для раздела «Медиа», и для выбора в карточке товара. */
+export async function GET(request: Request) {
+  const guarded = await requireMember(request);
+
+  if (!guarded.ok) {
+    return guarded.response;
+  }
+
+  const params = new URL(request.url).searchParams;
+  const query = (params.get("q") ?? "").trim();
+
+  return ok(await listMedia(query, mediaSort(params.get("sort"))));
+}
+
+/** Загрузка файла. Ответ - карточка галереи: её же кладут в форму товара. */
 export async function POST(request: Request) {
   const guarded = await requireMember(request);
 
@@ -41,9 +50,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const key = await storeProductImage(file);
-
-    return ok({ url: toPublicImageUrl(`/images/${key}`) }, { status: 201 });
+    return ok({ file: await addMedia(file) }, { status: 201 });
   } catch (error) {
     if (error instanceof BrokenImageError) {
       return fail(error.message, 415);

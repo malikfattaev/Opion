@@ -184,6 +184,28 @@ model ProductImage {
   @@index([productId, position])
 }
 
+/**
+ * Файл, загруженный из админки. Бакет умеет только хранить, а разделу «Медиа»
+ * нужны исходное имя, размеры и поиск, поэтому список ведём в базе.
+ */
+model MediaFile {
+  id String @id @default(cuid())
+
+  /// Путь, по которому файл отдаётся наружу: /images/products/ab12.webp
+  path String @unique
+  /// Имя, с которым файл загрузили.
+  name String
+
+  /// У файлов, загруженных до появления раздела, размеры неизвестны.
+  width  Int?
+  height Int?
+  bytes  Int?
+
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
+
 enum TeamRole {
   /// Заводит и удаляет других участников команды.
   OWNER
