@@ -58,6 +58,67 @@ export function CloseIcon({ className }: IconProps) {
   );
 }
 
+export function GaugeIcon({ className }: IconProps) {
+  return (
+    <svg {...BASE} className={className}>
+      <path d="M4 18a8.5 8.5 0 1 1 16 0" />
+      <path d="m12 14 4-4" />
+      <circle cx="12" cy="18" r="1.25" />
+    </svg>
+  );
+}
+
+export function WalletIcon({ className }: IconProps) {
+  return (
+    <svg {...BASE} className={className}>
+      <path d="M3.5 7.5A2 2 0 0 1 5.5 5.5h11a2 2 0 0 1 2 2" />
+      <rect x="3.5" y="7.5" width="17" height="11.5" rx="2" />
+      <path d="M20.5 11.5h-3.25a1.75 1.75 0 0 0 0 3.5h3.25" />
+    </svg>
+  );
+}
+
+export function ChartIcon({ className }: IconProps) {
+  return (
+    <svg {...BASE} className={className}>
+      <path d="M4 20V4" />
+      <path d="M4 20h16" />
+      <path d="M8 20v-6M13 20V9M18 20v-9.5" />
+    </svg>
+  );
+}
+
+export function UsersIcon({ className }: IconProps) {
+  return (
+    <svg {...BASE} className={className}>
+      <circle cx="9.5" cy="8.5" r="3.5" />
+      <path d="M3.5 19.5a6 6 0 0 1 12 0" />
+      <path d="M16 5.5a3.5 3.5 0 0 1 0 6.75" />
+      <path d="M18 14.5a5.5 5.5 0 0 1 3 5" />
+    </svg>
+  );
+}
+
+export function PencilIcon({ className }: IconProps) {
+  return (
+    <svg {...BASE} className={className}>
+      <path d="M4 20.5h4l10-10a2.5 2.5 0 0 0-3.5-3.5l-10 10v3.5Z" />
+      <path d="m13.5 8.5 2.5 2.5" />
+    </svg>
+  );
+}
+
+export function TrashIcon({ className }: IconProps) {
+  return (
+    <svg {...BASE} className={className}>
+      <path d="M4.5 6.5h15" />
+      <path d="M9.5 6.5V5a1.5 1.5 0 0 1 1.5-1.5h2A1.5 1.5 0 0 1 14.5 5v1.5" />
+      <path d="M6.5 6.5 7.5 20a1.5 1.5 0 0 0 1.5 1.5h6a1.5 1.5 0 0 0 1.5-1.5l1-13.5" />
+      <path d="M10.5 10.5v7M13.5 10.5v7" />
+    </svg>
+  );
+}
+
 export function ChevronDownIcon({ className }: IconProps) {
   return (
     <svg {...BASE} className={className}>

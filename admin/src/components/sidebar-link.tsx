@@ -3,21 +3,27 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { LayersIcon, SparkIcon, TagIcon } from "@/components/icons";
+import { ChartIcon, GaugeIcon, LayersIcon, SparkIcon, TagIcon, UsersIcon, WalletIcon } from "@/components/icons";
 import type { NavigationItem, NavigationIcon } from "@/config/site";
 
 /** Картинки лежат рядом с ссылкой: через границу сервер-клиент компоненты не передать. */
 const ICONS: Record<NavigationIcon, (props: { className?: string }) => React.ReactElement> = {
+  gauge: GaugeIcon,
   tag: TagIcon,
   layers: LayersIcon,
   spark: SparkIcon,
+  wallet: WalletIcon,
+  chart: ChartIcon,
+  users: UsersIcon,
 };
 
 /** Активный раздел подсвечен: иначе непонятно, где находишься. */
 export function SidebarLink({ item }: { item: NavigationItem }) {
   const pathname = usePathname();
-  const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
   const Icon = ICONS[item.icon];
+
+  // У панели управления адрес корневой, и «начинается с /» подошло бы всему.
+  const isActive = item.href === "/" ? pathname === "/" : pathname === item.href || pathname.startsWith(`${item.href}/`);
 
   return (
     <Link

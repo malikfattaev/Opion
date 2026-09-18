@@ -8,26 +8,31 @@ export const adminConfig = {
     src: "/brand/logo.png",
     width: 1200,
     height: 481,
-    headerHeight: 28,
+    sidebarHeight: 40,
   },
 } as const;
 
 /** Ключ картинки раздела: сами иконки живут в компонентах, конфиг остаётся без JSX. */
-export type NavigationIcon = "tag" | "layers" | "spark";
+export type NavigationIcon = "gauge" | "tag" | "layers" | "spark" | "wallet" | "chart" | "users";
 
 export type NavigationItem = {
   href: string;
   label: string;
   icon: NavigationIcon;
+  /** Раздел виден только владельцу: менеджеру там всё равно откажет API. */
+  ownerOnly?: boolean;
 };
 
 export type NavigationGroup = {
-  title: string;
+  /** У первой группы заголовка нет: панель управления стоит особняком. */
+  title?: string;
   items: readonly NavigationItem[];
 };
 
-/** Разделы админки. Заказы и команда появятся следующими шагами. */
 export const adminNavigation: readonly NavigationGroup[] = [
+  {
+    items: [{ href: "/", label: "Панель управления", icon: "gauge" }],
+  },
   {
     title: "Каталог",
     items: [
@@ -35,6 +40,17 @@ export const adminNavigation: readonly NavigationGroup[] = [
       { href: "/types", label: "Типы", icon: "layers" },
       { href: "/styles", label: "Стили", icon: "spark" },
     ],
+  },
+  {
+    title: "Финансы",
+    items: [
+      { href: "/cashflow", label: "Кешфлоу", icon: "wallet" },
+      { href: "/sales", label: "Продажи", icon: "chart" },
+    ],
+  },
+  {
+    title: "Администрирование",
+    items: [{ href: "/users", label: "Пользователи", icon: "users", ownerOnly: true }],
   },
 ];
 

@@ -71,6 +71,8 @@ export const memberUpdateSchema = z.object({
   password: z.string().min(8, "Пароль короче 8 символов").max(200).optional(),
 });
 
+export type MemberCreate = z.infer<typeof memberCreateSchema>;
+export type MemberUpdate = z.infer<typeof memberUpdateSchema>;
 export type OptionCreate = z.infer<typeof optionCreateSchema>;
 export type ProductCreate = z.infer<typeof productCreateSchema>;
 export type ProductUpdate = z.infer<typeof productUpdateSchema>;

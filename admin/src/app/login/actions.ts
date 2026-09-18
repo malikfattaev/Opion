@@ -21,7 +21,7 @@ export async function login(_state: LoginState, formData: FormData): Promise<Log
     return { message: result.message };
   }
 
-  redirect("/products");
+  redirect("/");
 }
 
 /** Выход из админки. Токен гасится и на стороне API. */

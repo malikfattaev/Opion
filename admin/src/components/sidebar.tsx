@@ -4,7 +4,7 @@ import Link from "next/link";
 import { logout } from "@/app/login/actions";
 import { LogoutIcon } from "@/components/icons";
 import { SidebarLink } from "@/components/sidebar-link";
-import { adminConfig, adminNavigation, adminRoleLabels } from "@/config/site";
+import { adminConfig, adminNavigation, adminRoleLabels, type NavigationGroup } from "@/config/site";
 import type { Member } from "@/lib/api/session";
 
 /**
@@ -13,16 +13,16 @@ import type { Member } from "@/lib/api/session";
  */
 export function Sidebar({ member }: { member: Member }) {
   return (
-    <aside className="sticky top-0 z-20 flex flex-col gap-4 border-b border-line bg-canvas px-5 py-4 lg:fixed lg:inset-y-0 lg:left-0 lg:w-64 lg:gap-10 lg:border-r lg:border-b-0 lg:px-5 lg:py-8">
-      <div className="flex items-center justify-between gap-4">
-        <Link href="/products" aria-label={`${adminConfig.wordmark}, админка`} className="lg:px-3">
+    <aside className="sticky top-0 z-20 flex flex-col gap-4 border-b border-line bg-canvas px-5 py-4 lg:fixed lg:inset-y-0 lg:left-0 lg:w-64 lg:gap-8 lg:border-r lg:border-b-0 lg:px-5 lg:py-8">
+      <div className="flex items-center justify-between gap-4 lg:flex-col lg:gap-6">
+        <Link href="/" aria-label={`${adminConfig.wordmark}, админка`}>
           <Image
             src={adminConfig.logo.src}
             alt={adminConfig.wordmark}
             width={adminConfig.logo.width}
             height={adminConfig.logo.height}
             priority
-            style={{ height: adminConfig.logo.headerHeight, width: "auto" }}
+            style={{ height: adminConfig.logo.sidebarHeight, width: "auto" }}
           />
         </Link>
 
@@ -30,15 +30,20 @@ export function Sidebar({ member }: { member: Member }) {
           <Avatar name={member.name} />
           <LogoutButton />
         </div>
+
+        {/* Короткая черта: отделяет знак от разделов, но не режет колонку насквозь. */}
+        <span aria-hidden className="hidden h-px w-24 bg-line lg:block" />
       </div>
 
       <nav aria-label="Разделы админки" className="-mx-5 overflow-x-auto px-5 lg:mx-0 lg:overflow-visible lg:px-0">
-        <div className="flex flex-col gap-6">
-          {adminNavigation.map((group) => (
-            <div key={group.title}>
-              <p className="hidden px-3 pb-2 text-xs tracking-widest text-ink-muted uppercase lg:block">
-                {group.title}
-              </p>
+        <div className="flex items-center gap-6 lg:flex-col lg:items-stretch lg:gap-6">
+          {visibleGroups(member.role).map((group, index) => (
+            <div key={group.title ?? index}>
+              {group.title ? (
+                <p className="hidden px-3 pb-2 text-xs tracking-widest text-ink-muted uppercase lg:block">
+                  {group.title}
+                </p>
+              ) : null}
 
               <ul className="flex items-center gap-1 lg:flex-col lg:items-stretch">
                 {group.items.map((item) => (
@@ -66,6 +71,13 @@ export function Sidebar({ member }: { member: Member }) {
       </div>
     </aside>
   );
+}
+
+/** Менеджеру не показываем то, куда его всё равно не пустят. */
+function visibleGroups(role: Member["role"]): NavigationGroup[] {
+  return adminNavigation
+    .map((group) => ({ ...group, items: group.items.filter((item) => !item.ownerOnly || role === "OWNER") }))
+    .filter((group) => group.items.length > 0);
 }
 
 /** Фотографий у команды нет, поэтому в кружке первая буква имени. */

@@ -4,12 +4,10 @@ import Link from "next/link";
 import { PlusIcon } from "@/components/icons";
 import { ProductRowActions } from "@/components/product-row-actions";
 import { EmptyState, PageHeader } from "@/components/ui";
-import { adminConfig } from "@/config/site";
 import { listOptions, listProducts, type AdminProduct } from "@/lib/api/catalog";
+import { formatNumber, formatPrice } from "@/lib/money";
 
 export const metadata: Metadata = { title: "Товары" };
-
-const priceFormatter = new Intl.NumberFormat(adminConfig.locale);
 
 export default async function ProductsPage() {
   const [products, types, styles] = await Promise.all([
@@ -100,12 +98,10 @@ export default async function ProductsPage() {
                   </td>
 
                   <td className="px-4 py-4 text-right whitespace-nowrap tabular-nums">
-                    <p>
-                      {priceFormatter.format(product.price)} {adminConfig.currencyLabel}
-                    </p>
+                    <p>{formatPrice(product.price)}</p>
                     {product.comparePrice === null ? null : (
                       <p className="mt-1 text-xs text-ink-muted line-through">
-                        {priceFormatter.format(product.comparePrice)}
+                        {formatNumber(product.comparePrice)}
                       </p>
                     )}
                   </td>

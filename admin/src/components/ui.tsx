@@ -64,6 +64,50 @@ export function PrimaryButton({
   );
 }
 
+/** Круглая кнопка с иконкой: подпись читает скринридер и всплывающая подсказка. */
+export function IconButton({
+  label,
+  tone = "plain",
+  children,
+  ...props
+}: { label: string; tone?: "plain" | "danger" } & React.ButtonHTMLAttributes<HTMLButtonElement>) {
+  return (
+    <button
+      {...props}
+      type={props.type ?? "button"}
+      aria-label={label}
+      title={label}
+      className={`flex size-9 items-center justify-center rounded-full text-ink-muted transition-colors hover:bg-surface disabled:opacity-40 ${
+        tone === "danger" ? "hover:text-danger" : "hover:text-ink"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
+/** Та же кнопка, но ведёт на страницу. */
+export function IconLink({
+  href,
+  label,
+  children,
+}: {
+  href: string;
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <Link
+      href={href}
+      aria-label={label}
+      title={label}
+      className="flex size-9 items-center justify-center rounded-full text-ink-muted transition-colors hover:bg-surface hover:text-ink"
+    >
+      {children}
+    </Link>
+  );
+}
+
 export function GhostLink({ href, children }: { href: string; children: React.ReactNode }) {
   return (
     <Link

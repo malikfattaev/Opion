@@ -3,9 +3,17 @@
 import { useActionState, useState } from "react";
 
 import { removeOption, saveOption, type OptionFormState } from "@/app/(workspace)/options-actions";
-import { PlusIcon } from "@/components/icons";
+import { PencilIcon, PlusIcon, TrashIcon } from "@/components/icons";
 import { Modal } from "@/components/modal";
-import { EmptyState, ErrorText, Field, inputClassName, PageHeader, PrimaryButton } from "@/components/ui";
+import {
+  EmptyState,
+  ErrorText,
+  Field,
+  IconButton,
+  inputClassName,
+  PageHeader,
+  PrimaryButton,
+} from "@/components/ui";
 import { optionSections, type OptionKind } from "@/config/site";
 import type { AdminOption } from "@/lib/api/catalog";
 
@@ -75,15 +83,11 @@ export function OptionsManager({ kind, options }: { kind: OptionKind; options: r
                     {option.productCount === 0 ? "—" : option.productCount}
                   </td>
 
-                  <td className="px-4 py-4">
-                    <div className="flex items-center justify-end gap-4">
-                      <button
-                        type="button"
-                        onClick={() => setEditing({ option })}
-                        className="text-xs text-ink-muted underline underline-offset-4 hover:text-ink"
-                      >
-                        Изменить
-                      </button>
+                  <td className="py-4 pr-4 pl-2">
+                    <div className="flex items-center justify-end gap-1">
+                      <IconButton label="Изменить" onClick={() => setEditing({ option })}>
+                        <PencilIcon className="size-4" />
+                      </IconButton>
 
                       <RemoveOption kind={kind} option={option} />
                     </div>
@@ -182,24 +186,25 @@ function RemoveOption({ kind, option }: { kind: OptionKind; option: AdminOption 
   const [state, formAction, isPending] = useActionState(removeOption, INITIAL);
 
   return (
-    <form action={formAction} className="flex items-center gap-3">
+    <form action={formAction} className="flex items-center gap-2">
       <input type="hidden" name="kind" value={kind} />
       <input type="hidden" name="id" value={option.id} />
 
       <ErrorText>{state.message}</ErrorText>
 
-      <button
+      <IconButton
+        label="Удалить"
         type="submit"
+        tone="danger"
         disabled={isPending}
         onClick={(event) => {
           if (!window.confirm(`Удалить «${option.name}»?`)) {
             event.preventDefault();
           }
         }}
-        className="text-xs text-ink-muted underline underline-offset-4 hover:text-danger disabled:opacity-40"
       >
-        Удалить
-      </button>
+        <TrashIcon className="size-4" />
+      </IconButton>
     </form>
   );
 }
