@@ -5,7 +5,7 @@ import { randomBytes } from "node:crypto";
 import { DeleteObjectsCommand, GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import sharp from "sharp";
 
-import { bucketConfig } from "@/lib/env";
+import { bucketConfig, publicApiOrigin } from "@/lib/env";
 
 /**
  * Фотографии товаров лежат в бакете Railway. Бакет закрытый, поэтому наружу
@@ -117,12 +117,39 @@ export async function forgetProductImages(urls: readonly string[]): Promise<void
   );
 }
 
-/** `https://api/images/products/ab12.webp` - это ключ `products/ab12.webp`. */
-function toKey(url: string): string | null {
-  const path = URL.parse(url)?.pathname;
-  const key = path?.startsWith(PUBLIC_PREFIX) ? decodeURIComponent(path.slice(PUBLIC_PREFIX.length)) : null;
+/**
+ * В базе лежит путь без домена: домен у API может смениться, а картинки
+ * должны продолжать открываться.
+ */
+export function toStoredImageUrl(url: string): string {
+  return imagePath(url) ?? url;
+}
 
-  return key?.startsWith(`${PRODUCTS_FOLDER}/`) ? key : null;
+/** Наружу путь разворачивается в полную ссылку: витрина живёт на другом домене. */
+export function toPublicImageUrl(url: string): string {
+  const path = imagePath(url);
+
+  if (!path) {
+    return url;
+  }
+
+  const origin = publicApiOrigin();
+
+  return origin ? `${origin}${path}` : path;
+}
+
+/** Путь нашей картинки, если ссылка вообще про неё. Чужие адреса не трогаем. */
+function imagePath(url: string): string | null {
+  const path = url.startsWith(PUBLIC_PREFIX) ? url : (URL.parse(url)?.pathname ?? null);
+
+  return path?.startsWith(`${PUBLIC_PREFIX}${PRODUCTS_FOLDER}/`) ? path : null;
+}
+
+/** `/images/products/ab12.webp` - это ключ `products/ab12.webp`. */
+function toKey(url: string): string | null {
+  const path = imagePath(url);
+
+  return path === null ? null : decodeURIComponent(path.slice(PUBLIC_PREFIX.length));
 }
 
 function isMissingObject(error: unknown): boolean {

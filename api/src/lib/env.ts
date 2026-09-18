@@ -26,6 +26,14 @@ const serverEnvSchema = z.object({
   /** Секрет, которым Telegram подписывает вызовы вебхука. Задаётся в setWebhook. */
   TELEGRAM_WEBHOOK_SECRET: z.string().min(16).optional(),
 
+  /**
+   * Адрес, по которому API виден из браузера. Нужен ссылкам на картинки:
+   * админка ходит к нам по внутренней сети, и её адрес наружу не годится.
+   */
+  PUBLIC_API_URL: z.url().optional(),
+  /** Домен, который Railway выдаёт сервису. Подставляется платформой. */
+  RAILWAY_PUBLIC_DOMAIN: z.string().min(1).optional(),
+
   /** Хранилище картинок: бакет Railway по протоколу S3. */
   BUCKET_NAME: z.string().min(1).optional(),
   BUCKET_ENDPOINT: z.url().optional(),
@@ -75,6 +83,17 @@ export function allowedOrigins(): string[] {
     .ALLOWED_ORIGINS.split(",")
     .map((origin) => origin.trim().replace(/\/+$/, ""))
     .filter(Boolean);
+}
+
+/** `null`, если публичный адрес неизвестен: тогда ссылки остаются относительными. */
+export function publicApiOrigin(): string | null {
+  const env = serverEnv();
+
+  if (env.PUBLIC_API_URL) {
+    return env.PUBLIC_API_URL.replace(/\/+$/, "");
+  }
+
+  return env.RAILWAY_PUBLIC_DOMAIN ? `https://${env.RAILWAY_PUBLIC_DOMAIN}` : null;
 }
 
 export type BucketConfig = {

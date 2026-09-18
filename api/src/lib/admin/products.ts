@@ -1,7 +1,7 @@
 import "server-only";
 
 import { db } from "@/lib/db";
-import { forgetProductImages } from "@/lib/storage/images";
+import { forgetProductImages, toPublicImageUrl, toStoredImageUrl } from "@/lib/storage/images";
 
 import { uniqueViolationField } from "./respond";
 import type { ProductCreate, ProductUpdate } from "./schema";
@@ -91,7 +91,7 @@ export async function createProduct(input: ProductCreate): Promise<AdminProduct>
       position: input.position ?? (await nextPosition()),
       typeId,
       styles: { create: styleIds.map((styleId) => ({ styleId })) },
-      images: { create: input.images.map((image, index) => ({ ...image, position: index })) },
+      images: { create: input.images.map(toImageRow) },
     },
     select: SELECTION,
   });
@@ -133,10 +133,7 @@ export async function updateProduct(id: string, input: ProductUpdate): Promise<A
       ...(input.images === undefined
         ? {}
         : {
-            images: {
-              deleteMany: {},
-              create: input.images.map((image, index) => ({ ...image, position: index })),
-            },
+            images: { deleteMany: {}, create: input.images.map(toImageRow) },
           }),
     },
     select: SELECTION,
@@ -158,6 +155,11 @@ export async function deleteProduct(id: string): Promise<boolean> {
   await forget(images.map(({ url }) => url));
 
   return true;
+}
+
+/** Ссылку на нашу картинку храним путём, чужую - как прислали. */
+function toImageRow(image: { url: string; alt: string }, index: number) {
+  return { url: toStoredImageUrl(image.url), alt: image.alt, position: index };
 }
 
 /** Какие файлы карточка перестала показывать после правки. */
@@ -241,7 +243,7 @@ function toAdminProduct(row: ProductRow): AdminProduct {
     sizes: row.sizes,
     typeSlug: row.type.slug,
     styleSlugs: row.styles.map(({ style }) => style.slug),
-    images: row.images,
+    images: row.images.map((image) => ({ ...image, url: toPublicImageUrl(image.url) })),
     isPublished: row.isPublished,
     position: row.position,
     createdAt: row.createdAt.toISOString(),

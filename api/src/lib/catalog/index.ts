@@ -1,6 +1,7 @@
 import "server-only";
 
 import { db } from "@/lib/db";
+import { toPublicImageUrl } from "@/lib/storage/images";
 
 import type { Product, ProductStyle, ProductType } from "./types";
 
@@ -115,7 +116,7 @@ function toProduct(row: ProductRow): Product {
     price: row.price,
     ...(row.comparePrice === null ? {} : { compareAtPrice: row.comparePrice }),
     sizes: row.sizes,
-    images: row.images,
+    images: row.images.map((image) => ({ ...image, url: toPublicImageUrl(image.url) })),
   };
 }
 

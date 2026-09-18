@@ -5,6 +5,7 @@ import {
   BucketNotConfiguredError,
   MAX_IMAGE_BYTES,
   storeProductImage,
+  toPublicImageUrl,
 } from "@/lib/storage/images";
 
 export const dynamic = "force-dynamic";
@@ -42,7 +43,7 @@ export async function POST(request: Request) {
   try {
     const key = await storeProductImage(file);
 
-    return ok({ url: new URL(`/images/${key}`, request.url).toString() }, { status: 201 });
+    return ok({ url: toPublicImageUrl(`/images/${key}`) }, { status: 201 });
   } catch (error) {
     if (error instanceof BrokenImageError) {
       return fail(error.message, 415);
